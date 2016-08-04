@@ -30,10 +30,12 @@ extern "C"
 		Big_Main
 	};
 
+	int selectedcharacter = -1;
+
 	void LoadCharacter_r()
 	{
 		ClearPlayerArrays();
-		int character = CurrentCharacter;
+		int character = selectedcharacter == -1 ? CurrentCharacter : selectedcharacter;
 		ObjectMaster *obj;
 		if (CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2)
 		{
@@ -77,12 +79,25 @@ extern "C"
 		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
 			Load2PTails(obj);
 		LoadTailsOpponent(CurrentCharacter, 1, CurrentLevel);
+		selectedcharacter = character;
+	}
+
+	const int loc_512BC6 = 0x512BC6;
+	__declspec(naked) void ResetSelectedCharacter()
+	{
+		__asm
+		{
+			mov [selectedcharacter],-1
+			push 0x512B40
+			jmp loc_512BC6
+		}
 	}
 
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
 	{
 		WriteJump(LoadCharacter, LoadCharacter_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
+		WriteJump((void*)0x512BC1, ResetSelectedCharacter);
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
