@@ -32,6 +32,7 @@ extern "C"
 
 	int selectedcharacter = -1;
 
+	FunctionPointer(int, sub_42FB00, (), 0x42FB00);
 	void LoadCharacter_r()
 	{
 		ClearPlayerArrays();
@@ -78,11 +79,27 @@ extern "C"
 		PutPlayerAtStartPointIGuess(obj->Data1);
 		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
 			Load2PTails(obj);
-		LoadTailsOpponent(CurrentCharacter, 1, CurrentLevel);
-		if (CurrentCharacter == Characters_Big)
+		switch (CurrentCharacter)
+		{
+		case Characters_Tails:
+			LoadTailsOpponent(CurrentCharacter, 1, CurrentLevel);
+			break;
+		case Characters_Knuckles:
+			if (sub_42FB00() != 1
+				&& (GameMode == GameModes_Adventure_ActionStg
+				|| GameMode == GameModes_Mission
+				|| GameMode == GameModes_Trial))
+			{
+				LoadObject(LoadObj_Data1, 6, EmeraldRadarHud_Load_Load);
+			}
+			break;
+		case Characters_Gamma:
+			LoadChildObject(LoadObj_Data1, (ObjectFuncPtr)0x4C51D0, obj); // doesn't work?
+			break;
+		case Characters_Big:
 			LoadObject(LoadObj_Data1, 6, BigHud_Main);
-		else if (CurrentCharacter == Characters_Gamma)
-			LoadChildObject(LoadObj_Data1, (ObjectFuncPtr)0x4C51D0, obj);
+			break;
+		}
 		selectedcharacter = character;
 	}
 
@@ -133,7 +150,6 @@ extern "C"
 		TimeSeconds = v1;
 	}
 
-	FunctionPointer(int, sub_42FB00, (), 0x42FB00);
 	int CheckLoadTimeRemainHUD()
 	{
 		return CurrentCharacter != Characters_Gamma || sub_42FB00();
@@ -149,6 +165,7 @@ extern "C"
 		WriteCall((void*)0x4A0150, SubtractSeconds);
 		WriteCall((void*)0x4A0198, SubtractSeconds);
 		WriteCall((void*)0x483760, CheckLoadTimeRemainHUD);
+		WriteJump((void*)0x47A907, (void*)0x47A936); // prevent Knuckles from automatically loading Emerald radar
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
