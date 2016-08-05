@@ -50,6 +50,11 @@ extern "C"
 				character = Characters_Sonic;
 				MetalSonicFlag = 0;
 			}
+			if (btn & Buttons_B)
+			{
+				character = Characters_Sonic;
+				MetalSonicFlag = 1;
+			}
 			if (btn & Buttons_X)
 				character = Characters_Eggman;
 			if (btn & Buttons_R)
@@ -64,11 +69,6 @@ extern "C"
 				character = Characters_Gamma;
 			if (btn & Buttons_Up)
 				character = Characters_Big;
-			if (btn & Buttons_B)
-			{
-				character = Characters_Sonic;
-				MetalSonicFlag = 1;
-			}
 			obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[character]);
 			obj->Data1->CharID = character;
 		}
@@ -79,6 +79,8 @@ extern "C"
 		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
 			Load2PTails(obj);
 		LoadTailsOpponent(CurrentCharacter, 1, CurrentLevel);
+		if (CurrentCharacter == Characters_Big)
+			LoadObject(LoadObj_Data1, 6, BigHud_Main);
 		selectedcharacter = character;
 	}
 
@@ -98,6 +100,7 @@ extern "C"
 		WriteJump(LoadCharacter, LoadCharacter_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
 		WriteJump((void*)0x512BC1, ResetSelectedCharacter);
+		WriteJump((void*)0x490C6B, (void*)0x490C80); // prevent Big from automatically loading Big's HUD
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
