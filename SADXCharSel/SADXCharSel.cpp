@@ -81,6 +81,8 @@ extern "C"
 		LoadTailsOpponent(CurrentCharacter, 1, CurrentLevel);
 		if (CurrentCharacter == Characters_Big)
 			LoadObject(LoadObj_Data1, 6, BigHud_Main);
+		else if (CurrentCharacter == Characters_Gamma)
+			LoadChildObject(LoadObj_Data1, (ObjectFuncPtr)0x4C51D0, obj);
 		selectedcharacter = character;
 	}
 
@@ -95,12 +97,58 @@ extern "C"
 		}
 	}
 
+	DataPointer(char, TimeSeconds, 0x3B0F128);
+	DataPointer(char, TimeMinutes, 0x3B0EF48);
+	void __cdecl SubtractSeconds(int seconds)
+	{
+		if (CurrentCharacter == Characters_Gamma)
+		{
+			AddSeconds(seconds);
+			return;
+		}
+		int v1; // eax@1
+		char v2; // cl@2
+
+		v1 = TimeSeconds - seconds;
+		if (v1  < 0)
+		{
+			v2 = TimeMinutes;
+			while (1)
+			{
+				v1 += 60;
+				TimeMinutes = --v2;
+				if (v2 < 0)
+				{
+					break;
+				}
+				if (v1 > 0)
+				{
+					TimeSeconds = v1;
+					return;
+				}
+			}
+			TimeMinutes = 0;
+			v1 = 0;
+		}
+		TimeSeconds = v1;
+	}
+
+	FunctionPointer(int, sub_42FB00, (), 0x42FB00);
+	int CheckLoadTimeRemainHUD()
+	{
+		return CurrentCharacter != Characters_Gamma || sub_42FB00();
+	}
+
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
 	{
 		WriteJump(LoadCharacter, LoadCharacter_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
 		WriteJump((void*)0x512BC1, ResetSelectedCharacter);
 		WriteJump((void*)0x490C6B, (void*)0x490C80); // prevent Big from automatically loading Big's HUD
+		WriteCall((void*)0x49FD54, SubtractSeconds);
+		WriteCall((void*)0x4A0150, SubtractSeconds);
+		WriteCall((void*)0x4A0198, SubtractSeconds);
+		WriteCall((void*)0x483760, CheckLoadTimeRemainHUD);
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
