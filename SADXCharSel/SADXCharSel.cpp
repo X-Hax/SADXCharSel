@@ -155,6 +155,11 @@ extern "C"
 		return CurrentCharacter != Characters_Gamma || sub_42FB00();
 	}
 
+	int GetCharacter0ID()
+	{
+		return GetCharacterID(0);
+	}
+
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
 	{
 		WriteJump(LoadCharacter, LoadCharacter_r);
@@ -166,6 +171,14 @@ extern "C"
 		WriteCall((void*)0x4A0198, SubtractSeconds);
 		WriteCall((void*)0x483760, CheckLoadTimeRemainHUD);
 		WriteJump((void*)0x47A907, (void*)0x47A936); // prevent Knuckles from automatically loading Emerald radar
+		WriteData((void*)0x475E7C, 0x90u, 6); // make radar work when not Knuckles
+		WriteData((void*)0x4764CC, 0x90u, 6); // make Tikal hints work when not Knuckles
+		WriteCall((void*)0x4D677C, GetCharacter0ID); // fix item boxes for Gamma
+		WriteCall((void*)0x4D6786, GetCharacter0ID); // fix item boxes for Big
+		WriteCall((void*)0x4D6790, GetCharacter0ID); // fix item boxes for Sonic
+		WriteCall((void*)0x4C06D9, GetCharacter0ID); // fix floating item boxes for Gamma
+		WriteCall((void*)0x4C06E3, GetCharacter0ID); // fix floating item boxes for Big
+		WriteCall((void*)0x4C06ED, GetCharacter0ID); // fix floating item boxes for Sonic
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
