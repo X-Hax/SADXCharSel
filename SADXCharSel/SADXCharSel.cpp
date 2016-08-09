@@ -32,11 +32,43 @@ extern "C"
 
 	int selectedcharacter = -1;
 
+	FunctionPointer(void, sub_404A60, (int), 0x404A60);
+	void __cdecl SetSelectedCharacter(int arg)
+	{
+		if (selectedcharacter == -1)
+			selectedcharacter = CurrentCharacter;
+		int btn = ControllerPointers[0]->HeldButtons;
+		if (btn & Buttons_Left)
+		{
+			selectedcharacter = Characters_Sonic;
+			MetalSonicFlag = 0;
+		}
+		if (btn & Buttons_B)
+		{
+			selectedcharacter = Characters_Sonic;
+			MetalSonicFlag = 1;
+		}
+		if (btn & Buttons_X)
+			selectedcharacter = Characters_Eggman;
+		if (btn & Buttons_R)
+			selectedcharacter = Characters_Tails;
+		if (btn & Buttons_Down)
+			selectedcharacter = Characters_Knuckles;
+		if (btn & Buttons_Y)
+			selectedcharacter = Characters_Tikal;
+		if (btn & Buttons_Right)
+			selectedcharacter = Characters_Amy;
+		if (btn & Buttons_L)
+			selectedcharacter = Characters_Gamma;
+		if (btn & Buttons_Up)
+			selectedcharacter = Characters_Big;
+		sub_404A60(arg);
+	}
+
 	FunctionPointer(int, sub_42FB00, (), 0x42FB00);
 	void LoadCharacter_r()
 	{
 		ClearPlayerArrays();
-		int character = selectedcharacter == -1 ? CurrentCharacter : selectedcharacter;
 		ObjectMaster *obj;
 		if (CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2)
 		{
@@ -45,33 +77,8 @@ extern "C"
 		}
 		else
 		{
-			int btn = ControllerPointers[0]->HeldButtons;
-			if (btn & Buttons_Left)
-			{
-				character = Characters_Sonic;
-				MetalSonicFlag = 0;
-			}
-			if (btn & Buttons_B)
-			{
-				character = Characters_Sonic;
-				MetalSonicFlag = 1;
-			}
-			if (btn & Buttons_X)
-				character = Characters_Eggman;
-			if (btn & Buttons_R)
-				character = Characters_Tails;
-			if (btn & Buttons_Down)
-				character = Characters_Knuckles;
-			if (btn & Buttons_Y)
-				character = Characters_Tikal;
-			if (btn & Buttons_Right)
-				character = Characters_Amy;
-			if (btn & Buttons_L)
-				character = Characters_Gamma;
-			if (btn & Buttons_Up)
-				character = Characters_Big;
-			obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[character]);
-			obj->Data1->CharID = character;
+			obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter]);
+			obj->Data1->CharID = selectedcharacter;
 		}
 		obj->Data1->CharIndex = 0;
 		CharObj1Ptrs[0] = obj->Data1;
@@ -100,7 +107,6 @@ extern "C"
 			LoadObject(LoadObj_Data1, 6, BigHud_Main);
 			break;
 		}
-		selectedcharacter = character;
 	}
 
 	const int loc_512BC6 = 0x512BC6;
@@ -160,8 +166,14 @@ extern "C"
 		return GetCharacterID(0);
 	}
 
+	int GetSelectedCharacter()
+	{
+		return selectedcharacter;
+	}
+
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
 	{
+		WriteCall((void*)0x41522C, SetSelectedCharacter);
 		WriteJump(LoadCharacter, LoadCharacter_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
 		WriteJump((void*)0x512BC1, ResetSelectedCharacter);
@@ -179,6 +191,12 @@ extern "C"
 		WriteCall((void*)0x4C06D9, GetCharacter0ID); // fix floating item boxes for Gamma
 		WriteCall((void*)0x4C06E3, GetCharacter0ID); // fix floating item boxes for Big
 		WriteCall((void*)0x4C06ED, GetCharacter0ID); // fix floating item boxes for Sonic
+		WriteCall((void*)0x424D0A, GetSelectedCharacter); // fix character sfx for Casinopolis
+		WriteData((void**)0x424F88, (void*)0x424E41);
+		WriteData((void**)0x424F8C, (void*)0x424E5C);
+		WriteData((void**)0x424F90, (void*)0x424E77);
+		WriteCall((void*)0x424E08, GetSelectedCharacter); // fix character sfx
+		WriteCall((void*)0x4245F0, GetSelectedCharacter); // fix character voices in Chao Garden
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
