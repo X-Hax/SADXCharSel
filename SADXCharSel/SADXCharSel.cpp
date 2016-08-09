@@ -192,11 +192,16 @@ extern "C"
 		WriteCall((void*)0x4C06E3, GetCharacter0ID); // fix floating item boxes for Big
 		WriteCall((void*)0x4C06ED, GetCharacter0ID); // fix floating item boxes for Sonic
 		WriteCall((void*)0x424D0A, GetSelectedCharacter); // fix character sfx for Casinopolis
-		WriteData((void**)0x424F88, (void*)0x424E41);
-		WriteData((void**)0x424F8C, (void*)0x424E5C);
-		WriteData((void**)0x424F90, (void*)0x424E77);
+		WriteData((void**)0x424F88, (void*)0x424E41); // ''
+		WriteData((void**)0x424F8C, (void*)0x424E5C); // ''
+		WriteData((void**)0x424F90, (void*)0x424E77); // ''
 		WriteCall((void*)0x424E08, GetSelectedCharacter); // fix character sfx
 		WriteCall((void*)0x4245F0, GetSelectedCharacter); // fix character voices in Chao Garden
+		WriteCall((void*)0x4BFFEF, GetCharacter0ID); // fix 1up icon
+		WriteCall((void*)0x4C02F3, GetCharacter0ID); // ''
+		WriteCall((void*)0x4D682F, GetCharacter0ID); // ''
+		WriteCall((void*)0x4D69AF, GetCharacter0ID); // ''
+		WriteCall((void*)0x425E62, GetCharacter0ID); // fix life icon
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
