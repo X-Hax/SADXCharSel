@@ -30,7 +30,7 @@ extern "C"
 		Big_Main
 	};
 
-	int selectedcharacter = -1;
+	__int16 selectedcharacter = -1;
 
 	FunctionPointer(void, sub_404A60, (int), 0x404A60);
 	void __cdecl SetSelectedCharacter(int arg)
@@ -78,7 +78,7 @@ extern "C"
 		else
 		{
 			obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter]);
-			obj->Data1->CharID = selectedcharacter;
+			obj->Data1->CharID = (char)selectedcharacter;
 		}
 		obj->Data1->CharIndex = 0;
 		CharObj1Ptrs[0] = obj->Data1;
@@ -100,9 +100,6 @@ extern "C"
 				LoadObject(LoadObj_Data1, 6, EmeraldRadarHud_Load_Load);
 			}
 			break;
-		case Characters_Gamma:
-			LoadChildObject(LoadObj_Data1, (ObjectFuncPtr)0x4C51D0, obj); // doesn't work?
-			break;
 		case Characters_Big:
 			LoadObject(LoadObj_Data1, 6, BigHud_Main);
 			break;
@@ -118,47 +115,6 @@ extern "C"
 			push 0x512B40
 			jmp loc_512BC6
 		}
-	}
-
-	DataPointer(char, TimeSeconds, 0x3B0F128);
-	DataPointer(char, TimeMinutes, 0x3B0EF48);
-	void __cdecl SubtractSeconds(int seconds)
-	{
-		if (CurrentCharacter == Characters_Gamma)
-		{
-			AddSeconds(seconds);
-			return;
-		}
-		int v1; // eax@1
-		char v2; // cl@2
-
-		v1 = TimeSeconds - seconds;
-		if (v1  < 0)
-		{
-			v2 = TimeMinutes;
-			while (1)
-			{
-				v1 += 60;
-				TimeMinutes = --v2;
-				if (v2 < 0)
-				{
-					break;
-				}
-				if (v1 > 0)
-				{
-					TimeSeconds = v1;
-					return;
-				}
-			}
-			TimeMinutes = 0;
-			v1 = 0;
-		}
-		TimeSeconds = v1;
-	}
-
-	int CheckLoadTimeRemainHUD()
-	{
-		return CurrentCharacter != Characters_Gamma || sub_42FB00();
 	}
 
 	int GetCharacter0ID()
@@ -178,10 +134,13 @@ extern "C"
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
 		WriteJump((void*)0x512BC1, ResetSelectedCharacter);
 		WriteJump((void*)0x490C6B, (void*)0x490C80); // prevent Big from automatically loading Big's HUD
-		WriteCall((void*)0x49FD54, SubtractSeconds);
-		WriteCall((void*)0x4A0150, SubtractSeconds);
-		WriteCall((void*)0x4A0198, SubtractSeconds);
-		WriteCall((void*)0x483760, CheckLoadTimeRemainHUD);
+		WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
+		WriteCall((void*)0x427F2B, GetCharacter0ID); // fix ResetTime2() for Gamma
+		WriteData((char*)0x41486D, (char)0xEB); // fix time reset at level load for Gamma
+		WriteData((__int16**)0x414A0C, &selectedcharacter); // fix 1min minimum at level restart for Gamma
+		WriteCall((void*)0x426081, GetCharacter0ID); // fix Gamma's timer
+		WriteCall((void*)0x4266C9, GetCharacter0ID); // fix Gamma's time bonus
+		WriteCall((void*)0x426379, GetCharacter0ID); // fix Gamma's time display
 		WriteJump((void*)0x47A907, (void*)0x47A936); // prevent Knuckles from automatically loading Emerald radar
 		WriteData((void*)0x475E7C, 0x90u, 6); // make radar work when not Knuckles
 		WriteData((void*)0x4764CC, 0x90u, 6); // make Tikal hints work when not Knuckles
