@@ -364,6 +364,14 @@ extern "C"
 		}
 	}
 
+	int SetAmyWinPose()
+	{
+		if (CurrentCharacter != Characters_Amy || (CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill))
+			return 42;
+		else
+			return 32;
+	}
+
 	int GetSelectedCharacter()
 	{
 		return selectedcharacter;
@@ -404,6 +412,8 @@ extern "C"
 		WriteCall((void*)0x4D69AF, GetCharacter0ID); // ''
 		WriteCall((void*)0x425E62, GetCharacter0ID); // fix life icon
 		WriteJump(LoadLevelResults, LoadLevelResults_r);
+		WriteData((char*)0x4879C1, (char)0x90);
+		WriteCall((void*)0x4879C2, SetAmyWinPose);
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
