@@ -392,6 +392,127 @@ extern "C"
 		}
 	}
 
+	void PlayPostResultsVoice1_i()
+	{
+		int v10;
+		switch (GetCharacter0ID())
+		{
+		case Characters_Sonic:
+			if (MetalSonicFlag)
+			{
+				PlayVoice(2044);
+				return;
+			}
+			v10 = 1497;
+			break;
+		case Characters_Tails:
+			v10 = 1460;
+			break;
+		case Characters_Knuckles:
+			v10 = 1447;
+			break;
+		case Characters_Amy:
+			v10 = 1392;
+			break;
+		case Characters_Big:
+			v10 = 1404;
+			break;
+		default:
+			return;
+		}
+		PlaySound(v10, 0, 0, 0);
+	}
+
+	const int loc_42866E = 0x42866E;
+	__declspec(naked) void PlayPostResultsVoice1()
+	{
+		__asm
+		{
+			call PlayPostResultsVoice1_i
+			jmp loc_42866E
+		}
+	}
+
+	void PlayPostResultsVoice2_i()
+	{
+		int v10;
+		switch (GetCharacter0ID())
+		{
+		case Characters_Sonic:
+			if (MetalSonicFlag)
+			{
+				PlayVoice(2044);
+				return;
+			}
+			v10 = 1499;
+			break;
+		case Characters_Tails:
+			v10 = 1462;
+			break;
+		case Characters_Knuckles:
+			v10 = 1449;
+			break;
+		case Characters_Amy:
+			v10 = 1391;
+			break;
+		case Characters_Big:
+			v10 = 1406;
+			break;
+		default:
+			return;
+		}
+		PlaySound(v10, 0, 0, 0);
+	}
+
+	__declspec(naked) void PlayPostResultsVoice2()
+	{
+		__asm
+		{
+			call PlayPostResultsVoice2_i
+			jmp loc_42866E
+		}
+	}
+
+	void PlayPostResultsVoice3_i()
+	{
+		int v10;
+		switch (GetCharacter0ID())
+		{
+		case Characters_Sonic:
+			if (MetalSonicFlag)
+			{
+				PlayVoice(2044);
+				return;
+			}
+			v10 = 1496;
+			break;
+		case Characters_Tails:
+			v10 = 1459;
+			break;
+		case Characters_Knuckles:
+			v10 = 1446;
+			break;
+		case Characters_Amy:
+			v10 = 1389;
+			break;
+		case Characters_Big:
+			v10 = 1403;
+			break;
+		default:
+			return;
+		}
+		PlaySound(v10, 0, 0, 0);
+	}
+
+	__declspec(naked) void PlayPostResultsVoice3()
+	{
+		__asm
+		{
+			call PlayPostResultsVoice3_i
+			jmp loc_42866E
+		}
+	}
+
 	int SetAmyWinPose()
 	{
 		if (CurrentCharacter != Characters_Amy || (CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill))
@@ -445,6 +566,9 @@ extern "C"
 		WriteData((void*)0x7A2061, 0x90u, 2); // make balloon work for all characters
 		WriteCall((void*)0x61CB77, GetCurrentCharacterID); // make Twinkle Park playable
 		WriteCall((void*)0x61CF8D, GetCurrentCharacterID); // ''
+		WriteJump((void*)0x42850A, PlayPostResultsVoice1);
+		WriteJump((void*)0x428603, PlayPostResultsVoice2);
+		WriteJump((void*)0x428591, PlayPostResultsVoice3);
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
