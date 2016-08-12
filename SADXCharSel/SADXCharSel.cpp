@@ -123,6 +123,26 @@ extern "C"
 	}
 
 	FunctionPointer(void, sub_469300, (int *, char, int), 0x469300);
+	void SetResultsCamera()
+	{
+		switch (GetCharacter0ID())
+		{
+		case Characters_Sonic:
+		case Characters_Tails:
+			sub_469300((int*)0x919BF4, 3, 720);
+			break;
+		case Characters_Knuckles:
+			sub_469300((int*)0x91A848, 3, 720);
+			break;
+		case Characters_Amy:
+			sub_469300((int*)0x9196D0, 3, 720);
+			break;
+		case Characters_Gamma:
+			sub_469300((int*)0x91A248, 3, 720);
+			break;
+		}
+	}
+
 	void __cdecl PlayStandardResultsVoice()
 	{
 		bool bosslevel = CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill;
@@ -187,6 +207,7 @@ extern "C"
 		case LevelIDs_SpeedHighway:
 			if (GetRaceWinnerPlayer() == 1)
 			{
+				SetResultsCamera();
 				PlayStandardResultsVoice();
 				Load_DelayedSound_BGM(MusicIDs_RoundClear);
 			}
@@ -208,6 +229,7 @@ extern "C"
 			}
 			if (GetRaceWinnerPlayer() == 1)
 			{
+				SetResultsCamera();
 				PlayStandardResultsVoice();
 				Load_DelayedSound_BGM(MusicIDs_RoundClear);
 			}
@@ -224,6 +246,7 @@ extern "C"
 				v3->PhysicsData.CollisionSize = 9;
 				v3->PhysicsData.YOff = 4.5f;
 			}
+			SetResultsCamera();
 			PlayStandardResultsVoice();
 			Load_DelayedSound_BGM(MusicIDs_RoundClear);
 			break;
@@ -268,9 +291,13 @@ extern "C"
 					}
 				}
 				else
+				{
+					SetResultsCamera();
 					PlayStandardResultsVoice();
+				}
 				break;
 			default:
+				SetResultsCamera();
 				PlayStandardResultsVoice();
 				break;
 			}
@@ -318,8 +345,11 @@ extern "C"
 			sub_457D00();
 			LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
 			SoundManager_Delete2();
-			if ((CurrentAct | (CurrentLevel << 8)) >= LevelAndActIDs_Chaos0 || GetCharacter0ID() != Characters_Knuckles)
+			if ((CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill) || GetCharacter0ID() != Characters_Knuckles)
+			{
+				SetResultsCamera();
 				PlayStandardResultsVoice();
+			}
 			else
 			{
 				sub_469300((int*)0x91A848, 3, 720);
@@ -328,7 +358,7 @@ extern "C"
 			Load_DelayedSound_BGM(MusicIDs_RoundClear);
 			break;
 		case Characters_Amy:
-			if ((CurrentAct | (CurrentLevel << 8)) >= LevelAndActIDs_Chaos0 || GetCharacter0ID() != Characters_Amy)
+			if (CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill)
 				LoadObject((LoadObj)0, 3, sub_4141F0);
 			else
 			{
@@ -336,7 +366,10 @@ extern "C"
 				sub_457D00();
 				LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
 				SoundManager_Delete2();
-				Load_DelayedSound_Voice(1733);
+				if (GetCharacter0ID() == Characters_Amy)
+					Load_DelayedSound_Voice(1733);
+				else
+					PlayStandardResultsVoice();
 				Load_DelayedSound_BGM(MusicIDs_RoundClear);
 			}
 			break;
@@ -414,6 +447,9 @@ extern "C"
 		WriteJump(LoadLevelResults, LoadLevelResults_r);
 		WriteData((char*)0x4879C1, (char)0x90);
 		WriteCall((void*)0x4879C2, SetAmyWinPose);
+		WriteData((void*)0x7A2061, 0x90u, 2); // make balloon work for all characters
+		WriteCall((void*)0x61CB77, GetCurrentCharacterID); // make Twinkle Park playable
+		WriteCall((void*)0x61CF8D, GetCurrentCharacterID); // ''
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
