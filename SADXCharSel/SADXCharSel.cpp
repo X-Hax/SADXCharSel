@@ -569,6 +569,7 @@ extern "C"
 		WriteJump((void*)0x42850A, PlayPostResultsVoice1);
 		WriteJump((void*)0x428603, PlayPostResultsVoice2);
 		WriteJump((void*)0x428591, PlayPostResultsVoice3);
+		WriteCall((void*)0x79D7E2, GetCharacter0ID); // fix cart jump voice
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
