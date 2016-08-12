@@ -122,6 +122,248 @@ extern "C"
 		return GetCharacterID(0);
 	}
 
+	FunctionPointer(void, sub_469300, (int *, char, int), 0x469300);
+	void __cdecl PlayStandardResultsVoice()
+	{
+		bool bosslevel = CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill;
+		switch (GetCharacter0ID())
+		{
+		case Characters_Sonic:
+			sub_469300((int*)0x919BF4, 3, 720);
+			if (MetalSonicFlag)
+				Load_DelayedSound_Voice(2044);
+			else if (bosslevel)
+				Load_DelayedSound_Voice(1843);
+			else
+				Load_DelayedSound_Voice(1840);
+			break;
+		case Characters_Eggman:
+			Load_DelayedSound_Voice(225);
+			break;
+		case Characters_Tails:
+			sub_469300((int*)0x919BF4, 3, 720);
+			if (bosslevel)
+				Load_DelayedSound_Voice(1806);
+			else
+				Load_DelayedSound_Voice(1803);
+			break;
+		case Characters_Knuckles:
+			sub_469300((int*)0x91A848, 3, 720);
+			if (bosslevel)
+				Load_DelayedSound_Voice(1788);
+			else
+				Load_DelayedSound_Voice(1793);
+			break;
+		case Characters_Amy:
+			sub_469300((int*)0x9196D0, 3, 720);
+			if (bosslevel)
+				Load_DelayedSound_Voice(1735);
+			else
+				Load_DelayedSound_Voice(1733);
+			break;
+		case Characters_Gamma:
+			sub_469300((int*)0x91A248, 3, 720);
+			Load_DelayedSound_Voice(1770);
+			break;
+		case Characters_Big:
+			if (bosslevel)
+				Load_DelayedSound_Voice(1750);
+			else
+				Load_DelayedSound_Voice(1747);
+			break;
+		}
+	}
+
+	DataPointer(short, word_3B2A2F0, 0x3B2A2F0);
+	ObjectFunc(sub_47D300, 0x47D300);
+	FunctionPointer(int, sub_46A820, (), 0x46A820);
+	FunctionPointer(int, sub_46A7F0, (), 0x46A7F0);
+	void __cdecl sub_461560()
+	{
+		CharObj2 *v3; // eax@20
+
+		switch (CurrentLevel)
+		{
+		case LevelIDs_SpeedHighway:
+			if (GetRaceWinnerPlayer() == 1)
+			{
+				PlayStandardResultsVoice();
+				Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			}
+			else
+				Load_DelayedSound_Voice(225);
+			if (GameMode != 9 || HIBYTE(word_3B2A2F0) != 1)
+				LoadObject(LoadObj_Data1, 3, sub_47D300);
+			break;
+		case LevelIDs_WindyValley:
+		case LevelIDs_SkyDeck:
+		case LevelIDs_IceCap:
+		case LevelIDs_Casinopolis:
+			if (sub_46A820())
+			{
+				if (sub_46A7F0() == 1)
+					SetOpponentRaceVictory();
+				else
+					SetTailsRaceVictory();
+			}
+			if (GetRaceWinnerPlayer() == 1)
+			{
+				PlayStandardResultsVoice();
+				Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			}
+			else
+				Load_DelayedSound_Voice(214);
+			if (GameMode != 9 || HIBYTE(word_3B2A2F0) != 1)
+				LoadObject(LoadObj_Data1, 3, sub_47D300);
+			break;
+		default:
+			SetTailsRaceVictory();
+			if (CurrentLevel == LevelIDs_SandHill)
+			{
+				v3 = GetCharObj2(0);
+				v3->PhysicsData.CollisionSize = 9;
+				v3->PhysicsData.YOff = 4.5f;
+			}
+			PlayStandardResultsVoice();
+			Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			break;
+		}
+	}
+
+	VoidFunc(sub_457D00, 0x457D00);
+	void __cdecl sub_4141F0(ObjectMaster *obj)
+	{
+		EntityData1 *v1 = GetCharacterObject(0)->Data1;
+		if (CharObj1Ptrs[1] && sub_46A820() && sub_46A7F0() == 1)
+			v1 = CharObj1Ptrs[1];
+		if (v1->Status & 3)
+		{
+			ForcePlayerAction(0, 19);
+			switch (CurrentCharacter)
+			{
+			case Characters_Tails:
+				sub_461560();
+				break;
+			case Characters_Gamma:
+				if (GetCharacter0ID() == Characters_Gamma)
+				{
+					sub_469300((int*)0x91A248, 3, 720);
+					switch (CurrentLevel)
+					{
+					case LevelIDs_EmeraldCoast:
+						Load_DelayedSound_Voice(1772);
+						break;
+					case LevelIDs_HotShelter:
+						Load_DelayedSound_Voice(1773);
+						break;
+					case LevelIDs_RedMountain:
+						Load_DelayedSound_Voice(1774);
+						break;
+					case LevelIDs_WindyValley:
+						Load_DelayedSound_Voice(1775);
+						break;
+					default:
+						Load_DelayedSound_Voice(1770);
+						break;
+					}
+				}
+				else
+					PlayStandardResultsVoice();
+				break;
+			default:
+				PlayStandardResultsVoice();
+				break;
+			}
+			sub_457D00();
+			LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
+			Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			CheckThingButThenDeleteObject(obj);
+		}
+	}
+
+	DataPointer(short, PauseEnabled, 0x90BF1C);
+	DataPointer(NJS_VECTOR, stru_3B2C6DC, 0x3B2C6DC);
+	DataPointer(NJS_VECTOR, stru_3B2C6D0, 0x3B2C6D0);
+	VoidFunc(sub_5919E0, 0x5919E0);
+	FunctionPointer(void, sub_43EC90, (EntityData1 *, NJS_VECTOR *), 0x43EC90);
+	FunctionPointer(void, sub_437D20, (void(__cdecl *a1)(int), char a2, char a3), 0x437D20);
+	FunctionPointer(void, sub_464B00, (int), 0x464B00);
+	void __cdecl LoadLevelResults_r()
+	{
+		NJS_VECTOR a1; // [sp+0h] [bp-18h]@12
+		NJS_VECTOR a2; // [sp+Ch] [bp-Ch]@12
+
+		DisableController(0);
+		PauseEnabled = 0;
+		DisableTimeThing();
+		if (GameMode == GameModes_Mission)
+			sub_5919E0();
+		if (CurrentCharacter != Characters_Tails && GetCharacter0ID() == Characters_Tails)
+			SetTailsRaceVictory();
+		switch (CurrentCharacter)
+		{
+		case Characters_Tails:
+			if (GetRaceWinnerPlayer() == 1)
+				LoadObject((LoadObj)0, 3, sub_4141F0);
+			else
+			{
+				ForcePlayerAction(0, 19);
+				sub_461560();
+				sub_457D00();
+				LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
+			}
+			break;
+		case Characters_Knuckles:
+			ForcePlayerAction(0, 19);
+			sub_457D00();
+			LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
+			SoundManager_Delete2();
+			if ((CurrentAct | (CurrentLevel << 8)) >= LevelAndActIDs_Chaos0 || GetCharacter0ID() != Characters_Knuckles)
+				PlayStandardResultsVoice();
+			else
+			{
+				sub_469300((int*)0x91A848, 3, 720);
+				Load_DelayedSound_Voice(1790);
+			}
+			Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			break;
+		case Characters_Amy:
+			if ((CurrentAct | (CurrentLevel << 8)) >= LevelAndActIDs_Chaos0 || GetCharacter0ID() != Characters_Amy)
+				LoadObject((LoadObj)0, 3, sub_4141F0);
+			else
+			{
+				ForcePlayerAction(0, 19);
+				sub_457D00();
+				LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
+				SoundManager_Delete2();
+				Load_DelayedSound_Voice(1733);
+				Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			}
+			break;
+		case Characters_Big:
+			ForcePlayerAction(0, 19);
+			a2.x = -36.072899f;
+			a2.y = 5.7132001f;
+			a2.z = -1.5176001f;
+			sub_43EC90(CharObj1Ptrs[0], &a2);
+			a1 = CharObj1Ptrs[0]->CollisionInfo->CollisionArray->v;
+			stru_3B2C6DC = a1;
+			njSubVector(&a1, &a2);
+			stru_3B2C6D0 = a1;
+			sub_437D20(sub_464B00, 1, 2);
+			sub_457D00();
+			LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
+			if ((CurrentAct | (CurrentLevel << 8)) < LevelAndActIDs_Chaos0)
+				SoundManager_Delete2();
+			Load_DelayedSound_BGM(MusicIDs_RoundClear);
+			break;
+		default:
+			LoadObject((LoadObj)0, 3, sub_4141F0);
+			SoundManager_Delete2();
+			break;
+		}
+	}
+
 	int GetSelectedCharacter()
 	{
 		return selectedcharacter;
@@ -161,6 +403,7 @@ extern "C"
 		WriteCall((void*)0x4D682F, GetCharacter0ID); // ''
 		WriteCall((void*)0x4D69AF, GetCharacter0ID); // ''
 		WriteCall((void*)0x425E62, GetCharacter0ID); // fix life icon
+		WriteJump(LoadLevelResults, LoadLevelResults_r);
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
