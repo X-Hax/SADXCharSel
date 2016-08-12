@@ -149,9 +149,8 @@ extern "C"
 		switch (GetCharacter0ID())
 		{
 		case Characters_Sonic:
-			sub_469300((int*)0x919BF4, 3, 720);
 			if (MetalSonicFlag)
-				Load_DelayedSound_Voice(2044);
+				return;
 			else if (bosslevel)
 				Load_DelayedSound_Voice(1843);
 			else
@@ -161,28 +160,24 @@ extern "C"
 			Load_DelayedSound_Voice(225);
 			break;
 		case Characters_Tails:
-			sub_469300((int*)0x919BF4, 3, 720);
 			if (bosslevel)
 				Load_DelayedSound_Voice(1806);
 			else
 				Load_DelayedSound_Voice(1803);
 			break;
 		case Characters_Knuckles:
-			sub_469300((int*)0x91A848, 3, 720);
 			if (bosslevel)
 				Load_DelayedSound_Voice(1788);
 			else
 				Load_DelayedSound_Voice(1793);
 			break;
 		case Characters_Amy:
-			sub_469300((int*)0x9196D0, 3, 720);
 			if (bosslevel)
 				Load_DelayedSound_Voice(1735);
 			else
 				Load_DelayedSound_Voice(1733);
 			break;
 		case Characters_Gamma:
-			sub_469300((int*)0x91A248, 3, 720);
 			Load_DelayedSound_Voice(1770);
 			break;
 		case Characters_Big:
