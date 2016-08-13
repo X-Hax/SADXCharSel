@@ -553,6 +553,34 @@ extern "C"
 		}
 	}
 
+	void OFrog_CheckTouch_i(ObjectMaster *obj)
+	{
+		EntityData1 *v1 = obj->Data1;
+		int v2 = IsPlayerInsideSphere(&v1->Position, (v1->Scale.x + 1.0) * 14.0);
+		if (v2 == 1)
+		{
+			SetTailsRaceVictory();
+			LoadLevelResults();
+			v1->Action = 3;
+		}
+		else if (v2 == 2 && CurrentCharacter == Characters_Tails)
+		{
+			SetOpponentRaceVictory();
+			LoadLevelResults();
+			v1->Action = 3;
+		}
+	}
+
+	__declspec(naked) void OFrog_CheckTouch()
+	{
+		__asm
+		{
+			push eax
+			call OFrog_CheckTouch_i
+			pop eax
+		}
+	}
+
 	DataArray(ObjectList *, ObjLists, 0x974AF8, 344);
 	void ReplaceSETObject(ObjectFuncPtr find, ObjectFuncPtr replace)
 	{
@@ -614,6 +642,7 @@ extern "C"
 		WriteData((ObjectFuncPtr*)0x4ECFE0, CheckLoadCapsule); // Chaos Emerald in Ice Cap
 		WriteData((ObjectFuncPtr*)0x7B0DD3, CheckLoadCapsule); // ending of Lost World
 		WriteData((ObjectFuncPtr*)0x5B2523, CheckLoadCapsule); // ending of Final Egg
+		WriteCall((void*)0x4FA352, OFrog_CheckTouch); // fix for Big in Tails levels
 		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
 	}
 
