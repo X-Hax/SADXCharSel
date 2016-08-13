@@ -578,6 +578,7 @@ extern "C"
 			push eax
 			call OFrog_CheckTouch_i
 			pop eax
+			retn
 		}
 	}
 
