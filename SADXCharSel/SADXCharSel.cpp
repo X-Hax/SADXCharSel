@@ -556,7 +556,7 @@ extern "C"
 	void __cdecl OFrog_CheckTouch_i(ObjectMaster *obj)
 	{
 		EntityData1 *v1 = obj->Data1;
-		int v2 = IsPlayerInsideSphere(&v1->Position, (v1->Scale.x + 1.0) * 14.0);
+		int v2 = IsPlayerInsideSphere(&v1->Position, (v1->Scale.x + 1.0f) * 14.0f);
 		if (v2 == 1)
 		{
 			SetTailsRaceVictory();
