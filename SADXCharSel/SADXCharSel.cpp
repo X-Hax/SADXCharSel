@@ -172,9 +172,9 @@ extern "C"
 			break;
 		case Characters_Knuckles:
 			if (bosslevel)
-				Load_DelayedSound_Voice(1788);
-			else
 				Load_DelayedSound_Voice(1793);
+			else
+				Load_DelayedSound_Voice(1788);
 			break;
 		case Characters_Amy:
 			if (bosslevel)
