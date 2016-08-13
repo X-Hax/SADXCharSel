@@ -553,7 +553,7 @@ extern "C"
 		}
 	}
 
-	void OFrog_CheckTouch_i(ObjectMaster *obj)
+	void __cdecl OFrog_CheckTouch_i(ObjectMaster *obj)
 	{
 		EntityData1 *v1 = obj->Data1;
 		int v2 = IsPlayerInsideSphere(&v1->Position, (v1->Scale.x + 1.0) * 14.0);
