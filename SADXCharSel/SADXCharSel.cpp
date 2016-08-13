@@ -19,18 +19,12 @@ extern "C"
 		}
 	}
 
-	ObjectFuncPtr charfuncs[] = {
-		Sonic_Main,
-		Eggman_Main,
-		Tails_Main,
-		Knuckles_Main,
-		Tikal_Main,
-		Amy_Main,
-		Gamma_Main,
-		Big_Main
-	};
-
 	__int16 selectedcharacter = -1;
+
+	int GetSelectedCharacter()
+	{
+		return selectedcharacter;
+	}
 
 	FunctionPointer(void, sub_404A60, (int), 0x404A60);
 	void __cdecl SetSelectedCharacter(int arg)
@@ -64,6 +58,17 @@ extern "C"
 			selectedcharacter = Characters_Big;
 		sub_404A60(arg);
 	}
+
+	ObjectFuncPtr charfuncs[] = {
+		Sonic_Main,
+		Eggman_Main,
+		Tails_Main,
+		Knuckles_Main,
+		Tikal_Main,
+		Amy_Main,
+		Gamma_Main,
+		Big_Main
+	};
 
 	FunctionPointer(int, sub_42FB00, (), 0x42FB00);
 	void LoadCharacter_r()
@@ -383,6 +388,7 @@ extern "C"
 			LoadObject(LoadObj_Data1, 5, j_ScoreDisplay_Main);
 			if ((CurrentAct | (CurrentLevel << 8)) < LevelAndActIDs_Chaos0)
 				SoundManager_Delete2();
+			PlayStandardResultsVoice(); // regular game doesn't play any voices
 			Load_DelayedSound_BGM(MusicIDs_RoundClear);
 			break;
 		default:
@@ -521,9 +527,40 @@ extern "C"
 			return 32;
 	}
 
-	int GetSelectedCharacter()
+	void __cdecl CheckLoadCapsule(ObjectMaster *obj)
 	{
-		return selectedcharacter;
+		if (GetCharacter0ID() == Characters_Big)
+		{
+			obj->Data1->Position.y += 10;
+			obj->MainSub = OFrog;
+			OFrog(obj);
+		}
+		else
+			Capsule_Load(obj);
+	}
+
+	void __cdecl CheckLoadFroggy(ObjectMaster *obj)
+	{
+		if (GetCharacter0ID() != Characters_Big)
+		{
+			obj->MainSub = OFrog;
+			OFrog(obj);
+		}
+		else
+		{
+			obj->MainSub = Froggy_Main;
+			Froggy_Main(obj);
+		}
+	}
+
+	DataArray(ObjectList *, ObjLists, 0x974AF8, 344);
+	void ReplaceSETObject(ObjectFuncPtr find, ObjectFuncPtr replace)
+	{
+		for (size_t i = 0; i < ObjLists_Length; i++)
+			if (ObjLists[i] != 0)
+				for (int j = 0; j < ObjLists[i]->Count; j++)
+					if (ObjLists[i]->List[j].LoadSub == find)
+						ObjLists[i]->List[j].LoadSub = replace;
 	}
 
 	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
@@ -570,6 +607,14 @@ extern "C"
 		WriteJump((void*)0x428603, PlayPostResultsVoice2);
 		WriteJump((void*)0x428591, PlayPostResultsVoice3);
 		WriteCall((void*)0x79D7E2, GetCharacter0ID); // fix cart jump voice
+		ReplaceSETObject(Capsule_Load, CheckLoadCapsule);
+		WriteData((ObjectFuncPtr*)0x4FA050, CheckLoadCapsule); // crashed plane in Emerald Coast
+		WriteData((ObjectFuncPtr*)0x4DF3F0, CheckLoadCapsule); // Chaos Emerald in Windy Valley
+		WriteData((ObjectFuncPtr*)0x5DD0E0, CheckLoadCapsule); // Chaos Emerald in Casinopolis
+		WriteData((ObjectFuncPtr*)0x4ECFE0, CheckLoadCapsule); // Chaos Emerald in Ice Cap
+		WriteData((ObjectFuncPtr*)0x7B0DD3, CheckLoadCapsule); // ending of Lost World
+		WriteData((ObjectFuncPtr*)0x5B2523, CheckLoadCapsule); // ending of Final Egg
+		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
 	}
 
 	__declspec(dllexport) ModInfo SADXModInfo = { ModLoaderVer };
