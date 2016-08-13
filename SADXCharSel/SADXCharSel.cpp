@@ -183,7 +183,10 @@ extern "C"
 				Load_DelayedSound_Voice(1733);
 			break;
 		case Characters_Gamma:
-			Load_DelayedSound_Voice(1770);
+			if (!bosslevel && CurrentCharacter == Characters_Big)
+				Load_DelayedSound_Voice(1772);
+			else
+				Load_DelayedSound_Voice(1770);
 			break;
 		case Characters_Big:
 			if (bosslevel)
