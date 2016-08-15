@@ -31,7 +31,7 @@ extern "C"
 	{
 		if (selectedcharacter == -1)
 			selectedcharacter = CurrentCharacter;
-		int btn = ControllerPointers[0]->HeldButtons;
+		int btn = *(int*)0x3B0E3A8;
 		if (btn & Buttons_Left)
 		{
 			selectedcharacter = Characters_Sonic;
@@ -87,7 +87,7 @@ extern "C"
 		}
 		obj->Data1->CharIndex = 0;
 		CharObj1Ptrs[0] = obj->Data1;
-		CharObj2Ptrs[0] = (CharObj2*)obj->Data2;
+		*(void**)0x3B36DD0 = obj->Data2;
 		PutPlayerAtStartPointIGuess(obj->Data1);
 		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
 			Load2PTails(obj);
