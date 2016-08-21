@@ -32,11 +32,8 @@ int GetSelectedCharacter()
 	return selectedcharacter;
 }
 
-FunctionPointer(void, sub_404A60, (int), 0x404A60);
-void __cdecl SetSelectedCharacter(int arg)
+void ChooseSelectedCharacter()
 {
-	if (selectedcharacter == -1)
-		selectedcharacter = CurrentCharacter;
 	int btn = *(int*)0x3B0E3A8;
 	if (btn & Buttons_Left)
 	{
@@ -62,6 +59,14 @@ void __cdecl SetSelectedCharacter(int arg)
 		selectedcharacter = Characters_Gamma;
 	if (btn & Buttons_Up)
 		selectedcharacter = Characters_Big;
+}
+
+FunctionPointer(void, sub_404A60, (int), 0x404A60);
+void __cdecl SetSelectedCharacter(int arg)
+{
+	if (selectedcharacter == -1)
+		selectedcharacter = CurrentCharacter;
+	ChooseSelectedCharacter();
 	sub_404A60(arg);
 }
 
@@ -707,9 +712,227 @@ static uint8_t ParseCharacterID(const string &str, Characters def)
 	return def;
 }
 
+const char *buttonstrings[] = {
+	"Left:  Sonic",
+	"X:     Eggman",
+	"R:     Tails",
+	"Down:  Knuckles",
+	"Y:     Tikal",
+	"Right: Amy",
+	"L:     Gamma",
+	"Up:    Big",
+	"B:     Metal Sonic"
+};
+
+DataPointer(int, VoiceLanguage, 0x3B0EF38);
+
 extern "C"
 {
-	__declspec(dllexport) void Init(const char *path, const HelperFunctions &helperFunctions)
+	__declspec(dllexport) void __cdecl OnFrame()
+	{
+		if (GameMode == GameModes_Menu || CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2 || !GetCharacterObject(0))
+			return;
+		int oldchar = selectedcharacter;
+		if (*(int*)0x3B0E3A8 & Buttons_Z)
+		{
+			ChooseSelectedCharacter();
+			int sc = selectedcharacter;
+			if (sc == Characters_Sonic && MetalSonicFlag)
+				sc = Characters_MetalSonic;
+			int textpos = 0x1000A;
+			SetDebugFontSize((unsigned short)(8 * min(VerticalStretch, HorizontalStretch)));
+			for (size_t i = 0; i < LengthOfArray(buttonstrings); i++)
+			{
+				if (i == sc)
+					SetDebugFontColor(0xFF00FF00);
+				else
+					SetDebugFontColor(0xFFBFBFBF);
+				DisplayDebugString(textpos++, buttonstrings[i]);
+			}
+			SetDebugFontColor(0xFFBFBFBF);
+			SetDebugFontSize(8);
+		}
+		if (selectedcharacter == oldchar)
+		{
+			if (selectedcharacter == Characters_Sonic)
+				if (MetalSonicFlag)
+					LoadCharTextures(Characters_MetalSonic);
+				else
+					UnloadCharTextures(Characters_MetalSonic);
+			return;
+		}
+		ObjectMaster *oldobj = GetCharacterObject(0);
+		short invulntime = oldobj->Data1->InvulnerableTime;
+		Loop *loopdata = oldobj->Data1->LoopData;
+		NJS_VECTOR pos = oldobj->Data1->Position;
+		Rotation rot = oldobj->Data1->Rotation;
+		CharObj2 *oldobj2 = ((EntityData2 *)oldobj->Data2)->CharacterData;
+		short powerups = oldobj2->Powerups;
+		short jumptime = oldobj2->JumpTime;
+		short underwatertime = oldobj2->UnderwaterTime;
+		float loopdist = oldobj2->LoopDist;
+		NJS_VECTOR speed = oldobj2->Speed;
+		oldobj->DeleteSub(oldobj);
+		oldobj->DeleteSub = nullptr;
+		oldobj->DisplaySub = nullsub;
+		oldobj->MainSub = DeleteObject_;
+		ObjectMaster *obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter]);
+		obj->Data1->CharID = (char)selectedcharacter;
+		obj->Data1->CharIndex = 0;
+		CharObj1Ptrs[0] = obj->Data1;
+		*(void**)0x3B36DD0 = obj->Data2;
+		obj->Data1->Position = pos;
+		obj->Data1->Rotation = rot;
+		obj->MainSub(obj);
+		obj->Data1->InvulnerableTime = invulntime;
+		obj->Data1->LoopData = loopdata;
+		CharObj2 *obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
+		obj2->Powerups = powerups;
+		obj2->JumpTime = jumptime;
+		obj2->UnderwaterTime = underwatertime;
+		obj2->LoopDist = loopdist;
+		obj2->Speed = speed;
+		if (oldchar == Characters_Gamma)
+		{
+			char min, sec, fr;
+			GetTime2(&min, &sec, &fr);
+			if (min < 3)
+			{
+				int t = fr + (sec * 60) + (min * 3600);
+				t = 10800 - t;
+				fr = t % 60;
+				sec = (t /= 60) % 60;
+				SetTime2(t / 60, sec, fr);
+			}
+			else
+				SetTime2(0, 0, 0);
+		}
+		else if (selectedcharacter == Characters_Gamma)
+		{
+			char min, sec, fr;
+			GetTime2(&min, &sec, &fr);
+			if (min < 2)
+			{
+				int t = fr + (sec * 60) + (min * 3600);
+				t = 10800 - t;
+				fr = t % 60;
+				sec = (t /= 60) % 60;
+				SetTime2(t / 60, sec, fr);
+			}
+			else
+				SetTime2(1, 0, 0);
+		}
+		switch (CurrentLevel)
+		{
+		case LevelIDs_Casinopolis:
+			switch (selectedcharacter)
+			{
+			default:
+				if (MetalSonicFlag)
+					LoadSoundList(62);
+				else
+					LoadSoundList(1);
+				if (VoiceLanguage)
+					LoadSoundList(60);
+				else
+					LoadSoundList(59);
+				break;
+			case Characters_Knuckles:
+				LoadSoundList(49);
+				if (VoiceLanguage)
+				{
+					LoadSoundList(70);
+					LoadSoundList(58);
+				}
+				else
+				{
+					LoadSoundList(69);
+					LoadSoundList(57);
+				}
+				break;
+			case Characters_Amy:
+				LoadSoundList(46);
+				if (VoiceLanguage)
+					LoadSoundList(64);
+				else
+					LoadSoundList(63);
+				break;
+			case Characters_Gamma:
+				LoadSoundList(48);
+				if (VoiceLanguage)
+					LoadSoundList(68);
+				else
+					LoadSoundList(67);
+				break;
+			case Characters_Big:
+				LoadSoundList(47);
+				if (VoiceLanguage)
+					LoadSoundList(66);
+				else
+					LoadSoundList(65);
+				break;
+			}
+			break;
+		case LevelIDs_SSGarden:
+		case LevelIDs_ECGarden:
+		case LevelIDs_MRGarden:
+		case LevelIDs_ChaoRace:
+			LoadCharVoices();
+			break;
+		default:
+			switch (selectedcharacter)
+			{
+			default:
+				if (MetalSonicFlag)
+					LoadSoundList(62);
+				else
+					LoadSoundList(1);
+				if (VoiceLanguage)
+					LoadSoundList(72);
+				else
+					LoadSoundList(71);
+				break;
+			case Characters_Knuckles:
+				LoadSoundList(49);
+				if (VoiceLanguage)
+					LoadSoundList(70);
+				else
+					LoadSoundList(69);
+				break;
+			case Characters_Amy:
+				LoadSoundList(46);
+				if (VoiceLanguage)
+					LoadSoundList(64);
+				else
+					LoadSoundList(63);
+				break;
+			case Characters_Gamma:
+				LoadSoundList(48);
+				if (VoiceLanguage)
+					LoadSoundList(68);
+				else
+					LoadSoundList(67);
+				break;
+			case Characters_Big:
+				LoadSoundList(47);
+				if (VoiceLanguage)
+					LoadSoundList(66);
+				else
+					LoadSoundList(65);
+				break;
+			case Characters_Tails:
+				LoadSoundList(1);
+				if (VoiceLanguage)
+					LoadSoundList(72);
+				else
+					LoadSoundList(71);
+				break;
+			}
+			break;
+		}
+	}
+
+	__declspec(dllexport) void __cdecl Init(const char *path, const HelperFunctions &helperFunctions)
 	{
 		WriteCall((void*)0x41522C, SetSelectedCharacter);
 		WriteJump(LoadCharacter, LoadCharacter_r);
