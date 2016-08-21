@@ -156,6 +156,7 @@ void __cdecl Load2PTails_r(ObjectMaster *player1)
 }
 
 FunctionPointer(int, sub_42FB00, (), 0x42FB00);
+FunctionPointer(ObjectMaster *, CheckLoadBird, (), 0x4C6820);
 void LoadCharacter_r()
 {
 	ClearPlayerArrays();
@@ -189,6 +190,9 @@ void LoadCharacter_r()
 		{
 			LoadObject(LoadObj_Data1, 6, EmeraldRadarHud_Load_Load);
 		}
+		break;
+	case Characters_Amy:
+		CheckLoadBird();
 		break;
 	case Characters_Big:
 		LoadObject(LoadObj_Data1, 6, BigHud_Main);
@@ -984,6 +988,7 @@ extern "C"
 		WriteData((ObjectFuncPtr*)0x7B0DD3, CheckLoadCapsule); // ending of Lost World
 		WriteData((ObjectFuncPtr*)0x5B2523, CheckLoadCapsule); // ending of Final Egg
 		WriteCall((void*)0x4FA352, OFrog_CheckTouch); // fix for Big in Tails levels
+		WriteData((void*)0x48ADA5, 0x90u, 6); // prevent Amy from loading the bird
 		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
