@@ -70,6 +70,23 @@ void __cdecl SetSelectedCharacter(int arg)
 	sub_404A60(arg);
 }
 
+// void __usercall(CharObj2 *a2@<edi>, EntityData1 *a3@<esi>)
+const void *const sub_7B4450Ptr = (void *)0x7B4450;
+inline void sub_7B4450(CharObj2 *a2, EntityData1 *a3)
+{
+	__asm
+	{
+		mov edi, [a2]
+		mov esi, [a3]
+		call sub_7B4450Ptr
+	}
+}
+
+void __cdecl Eggman_Display(ObjectMaster *obj)
+{
+	sub_7B4450(((EntityData2 *)obj->Data2)->CharacterData, obj->Data1);
+}
+
 ObjectFuncPtr charfuncs[] = {
 	Sonic_Main,
 	Eggman_Main,
@@ -119,6 +136,8 @@ void LoadTailsOpponent_r()
 		v3->Data1->CharID = raceaicharacter;
 		v3->Data1->CharIndex = 1;
 		v3->Data1->Unknown = 2;
+		if (raceaicharacter == Characters_Eggman)
+			v3->DisplaySub = Eggman_Display;
 		DisableController(1u);
 	}
 }
@@ -148,6 +167,8 @@ void __cdecl Load2PTails_r(ObjectMaster *player1)
 				v3->Data1->Position.x = player1->Data1->Position.x - njCos(player1->Data1->Rotation.y) * 10;
 				v3->Data1->Position.y = player1->Data1->Position.y;
 				v3->Data1->Position.z = player1->Data1->Position.z - _sin * 10;
+				if (tailsaicharacter == Characters_Eggman)
+					v3->DisplaySub = Eggman_Display;
 			}
 			v1->Data1->Action = 0;
 			dword_3B2A304 = 0;
@@ -170,6 +191,8 @@ void LoadCharacter_r()
 	{
 		obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter]);
 		obj->Data1->CharID = (char)selectedcharacter;
+		if (selectedcharacter == Characters_Eggman)
+			obj->DisplaySub = Eggman_Display;
 	}
 	obj->Data1->CharIndex = 0;
 	CharObj1Ptrs[0] = obj->Data1;
@@ -821,7 +844,8 @@ extern "C"
 		ObjectMaster *heldobj = obj2->ObjectHeld;
 		obj->DeleteSub(obj);
 		obj->MainSub = charfuncs[selectedcharacter];
-		obj->DisplaySub = nullptr;
+		if (selectedcharacter == Characters_Eggman)
+			obj->DisplaySub = Eggman_Display;
 		obj->Data1->CharID = (char)selectedcharacter;
 		obj->Data1->Action = 0;
 		if (!oldcol)
