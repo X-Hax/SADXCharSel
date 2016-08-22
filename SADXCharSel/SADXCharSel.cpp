@@ -728,12 +728,48 @@ const char *buttonstrings[] = {
 	"B:     Metal Sonic"
 };
 
+CollisionInfo *oldcol = nullptr;
+
 DataPointer(int, VoiceLanguage, 0x3B0EF38);
+
+FunctionPointer(void, sub_43FA90, (EntityData1 *a1, CharObj2 **a2, CharObj2 *a3), 0x43FA90);
+void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
+{
+	for (int i = 0; i < 8; i++)
+		if (CharObj1Ptrs[i] && CharObj1Ptrs[i] != a1 && CharObj1Ptrs[i]->CharID == a1->CharID)
+			return;
+	sub_43FA90(a1, a2, a3);
+}
 
 extern "C"
 {
+	__declspec(dllexport) void __cdecl OnControl()
+	{
+		if (GameMode != GameModes_Menu && ControllerPointers[0]->HeldButtons & Buttons_Z)
+		{
+			Controllers[0].PressedButtons &= ~(Buttons_B | Buttons_L | Buttons_R | Buttons_X | Buttons_Y);
+			Controllers[0].HeldButtons &= ~(Buttons_L | Buttons_R);
+			Controllers[0].LTriggerPressure = 0;
+			Controllers[0].RTriggerPressure = 0;
+			*(int*)0x3B0E354 &= ~(Buttons_B | Buttons_L | Buttons_R | Buttons_X | Buttons_Y | Buttons_Down | Buttons_Left | Buttons_Right | Buttons_Up);
+		}
+	}
+
 	__declspec(dllexport) void __cdecl OnFrame()
 	{
+		if (oldcol)
+		{
+			if (HIBYTE(oldcol->flags_b) & 0x80)
+			{
+				if (oldcol->CollisionArray)
+				{
+					FreeMemory(oldcol->CollisionArray);
+					oldcol->CollisionArray = nullptr;
+				}
+			}
+			FreeMemory(oldcol);
+			oldcol = nullptr;
+		}
 		if (GameMode == GameModes_Menu || CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2 || !GetCharacterObject(0))
 			return;
 		int oldchar = selectedcharacter;
@@ -765,32 +801,22 @@ extern "C"
 					UnloadCharTextures(Characters_MetalSonic);
 			return;
 		}
-		ObjectMaster *oldobj = GetCharacterObject(0);
-		short invulntime = oldobj->Data1->InvulnerableTime;
-		Loop *loopdata = oldobj->Data1->LoopData;
-		NJS_VECTOR pos = oldobj->Data1->Position;
-		Rotation rot = oldobj->Data1->Rotation;
-		CharObj2 *oldobj2 = ((EntityData2 *)oldobj->Data2)->CharacterData;
-		short powerups = oldobj2->Powerups;
-		short jumptime = oldobj2->JumpTime;
-		short underwatertime = oldobj2->UnderwaterTime;
-		float loopdist = oldobj2->LoopDist;
-		NJS_VECTOR speed = oldobj2->Speed;
-		oldobj->DeleteSub(oldobj);
-		oldobj->DeleteSub = nullptr;
-		oldobj->DisplaySub = nullsub;
-		oldobj->MainSub = DeleteObject_;
-		ObjectMaster *obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter]);
-		obj->Data1->CharID = (char)selectedcharacter;
-		obj->Data1->CharIndex = 0;
-		CharObj1Ptrs[0] = obj->Data1;
-		*(void**)0x3B36DD0 = obj->Data2;
-		obj->Data1->Position = pos;
-		obj->Data1->Rotation = rot;
-		obj->MainSub(obj);
-		obj->Data1->InvulnerableTime = invulntime;
-		obj->Data1->LoopData = loopdata;
+		ObjectMaster *obj = GetCharacterObject(0);
 		CharObj2 *obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
+		short powerups = obj2->Powerups;
+		short jumptime = obj2->JumpTime;
+		short underwatertime = obj2->UnderwaterTime;
+		float loopdist = obj2->LoopDist;
+		NJS_VECTOR speed = obj2->Speed;
+		obj->DeleteSub(obj);
+		obj->MainSub = charfuncs[selectedcharacter];
+		obj->DisplaySub = nullptr;
+		obj->Data1->CharID = (char)selectedcharacter;
+		obj->Data1->Action = 0;
+		oldcol = obj->Data1->CollisionInfo;
+		obj->Data1->CollisionInfo = nullptr;
+		obj->MainSub(obj);
+		obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
 		obj2->Powerups = powerups;
 		obj2->JumpTime = jumptime;
 		obj2->UnderwaterTime = underwatertime;
@@ -989,6 +1015,7 @@ extern "C"
 		WriteData((ObjectFuncPtr*)0x5B2523, CheckLoadCapsule); // ending of Final Egg
 		WriteCall((void*)0x4FA352, OFrog_CheckTouch); // fix for Big in Tails levels
 		WriteData((void*)0x48ADA5, 0x90u, 6); // prevent Amy from loading the bird
+		WriteCall((void*)0x44B0A4, CheckDeleteAnimThing);
 		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
