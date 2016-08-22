@@ -741,6 +741,16 @@ void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
 	sub_43FA90(a1, a2, a3);
 }
 
+DataPointer(NJS_TEXANIM, stru_91BB6C, 0x91BB6C);
+void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
+{
+	if (MetalSonicFlag)
+		stru_91BB6C.texid = 24;
+	else
+		stru_91BB6C.texid = selectedcharacter + 12;
+	njDrawSprite2D_3(_sp, n, pri, attr);
+}
+
 extern "C"
 {
 	__declspec(dllexport) void __cdecl OnControl()
@@ -1014,9 +1024,10 @@ extern "C"
 		WriteData((ObjectFuncPtr*)0x7B0DD3, CheckLoadCapsule); // ending of Lost World
 		WriteData((ObjectFuncPtr*)0x5B2523, CheckLoadCapsule); // ending of Final Egg
 		WriteCall((void*)0x4FA352, OFrog_CheckTouch); // fix for Big in Tails levels
-		WriteData((void*)0x48ADA5, 0x90u, 6); // prevent Amy from loading the bird
 		WriteCall((void*)0x44B0A4, CheckDeleteAnimThing);
 		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
+		WriteData((void*)0x48ADA5, 0x90u, 6); // prevent Amy from loading the bird
+		WriteCall((void*)0x46FC91, SetBigLifeTex); // fix life icon in Big levels
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
 		raceaicharacter = ParseCharacterID(settings->getString("", "RaceAICharacter"), Characters_Sonic);
