@@ -767,7 +767,7 @@ extern "C"
 
 	__declspec(dllexport) void __cdecl OnFrame()
 	{
-		if (oldcol)
+		if (!IsGamePaused() && oldcol)
 		{
 			if (HIBYTE(oldcol->flags_b) & 0x80)
 			{
@@ -818,13 +818,19 @@ extern "C"
 		short underwatertime = obj2->UnderwaterTime;
 		float loopdist = obj2->LoopDist;
 		NJS_VECTOR speed = obj2->Speed;
+		ObjectMaster *heldobj = obj2->ObjectHeld;
 		obj->DeleteSub(obj);
 		obj->MainSub = charfuncs[selectedcharacter];
 		obj->DisplaySub = nullptr;
 		obj->Data1->CharID = (char)selectedcharacter;
 		obj->Data1->Action = 0;
-		oldcol = obj->Data1->CollisionInfo;
-		obj->Data1->CollisionInfo = nullptr;
+		if (!oldcol)
+		{
+			oldcol = obj->Data1->CollisionInfo;
+			obj->Data1->CollisionInfo = nullptr;
+		}
+		else
+			FreeCollision(obj);
 		obj->MainSub(obj);
 		obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
 		obj2->Powerups = powerups;
@@ -832,6 +838,7 @@ extern "C"
 		obj2->UnderwaterTime = underwatertime;
 		obj2->LoopDist = loopdist;
 		obj2->Speed = speed;
+		obj2->ObjectHeld = heldobj;
 		if (oldchar == Characters_Gamma)
 		{
 			char min, sec, fr;
