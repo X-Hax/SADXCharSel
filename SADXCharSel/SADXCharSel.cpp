@@ -117,12 +117,15 @@ void LoadTailsOpponent_r()
 	int lvlact = levelact(CurrentLevel, CurrentAct);
 	if (lvlact == LevelAndActIDs_IceCap3 && GameMode == GameModes_Trial && byte_3B2A2F1 == 1)
 		return;
+	int aicourse = -1;
 	for (size_t i = 0; i < LengthOfArray(tailsracelevels); i++)
 		if (lvlact == tailsracelevels[i])
 		{
-			AICourse = i;
+			aicourse = i;
 			break;
 		}
+	if (aicourse == -1) return;
+	AICourse = aicourse;
 	if (lvlact == LevelAndActIDs_SpeedHighway1 || raceaicharacter == Characters_MetalSonic)
 	{
 		LoadObject((LoadObj)(LoadObj_UnknownB | LoadObj_Data1), 0, Eggman2PAI);
