@@ -777,6 +777,12 @@ void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
 	njDrawSprite2D_3(_sp, n, pri, attr);
 }
 
+FunctionPointer(int, sub_4751B0, (EntityData1 *), 0x4751B0);
+int __cdecl CheckKnucklesBoundaryThing(EntityData1 *data)
+{
+	return CurrentCharacter == Characters_Knuckles && sub_4751B0(data);
+}
+
 extern "C"
 {
 	__declspec(dllexport) void __cdecl OnControl()
@@ -1062,6 +1068,10 @@ extern "C"
 		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
 		WriteData((void*)0x48ADA5, 0x90u, 6); // prevent Amy from loading the bird
 		WriteCall((void*)0x46FC91, SetBigLifeTex); // fix life icon in Big levels
+		WriteCall((void*)0x478937, CheckKnucklesBoundaryThing);
+		WriteCall((void*)0x478AFC, CheckKnucklesBoundaryThing);
+		WriteCall((void*)0x47B395, CheckKnucklesBoundaryThing);
+		WriteCall((void*)0x47B423, CheckKnucklesBoundaryThing);
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
 		raceaicharacter = ParseCharacterID(settings->getString("", "RaceAICharacter"), Characters_Sonic);
