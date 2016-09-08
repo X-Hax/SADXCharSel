@@ -783,6 +783,25 @@ int __cdecl CheckKnucklesBoundaryThing(EntityData1 *data)
 	return CurrentCharacter == Characters_Knuckles && sub_4751B0(data);
 }
 
+int __cdecl SetSonicWinPose_i()
+{
+	if (CurrentCharacter != Characters_Amy || (CurrentLevel >= LevelIDs_Chaos0 && CurrentLevel != LevelIDs_SandHill))
+		return 75;
+	else
+		return 47;
+}
+
+const int loc_4961DD = 0x4961DD;
+__declspec(naked) void SetSonicWinPose()
+{
+	__asm
+	{
+		call SetSonicWinPose_i
+		mov word ptr[esi + 124h], ax
+		jmp loc_4961DD
+	}
+}
+
 extern "C"
 {
 	__declspec(dllexport) void __cdecl OnControl()
@@ -1072,6 +1091,7 @@ extern "C"
 		WriteCall((void*)0x478AFC, CheckKnucklesBoundaryThing);
 		WriteCall((void*)0x47B395, CheckKnucklesBoundaryThing);
 		WriteCall((void*)0x47B423, CheckKnucklesBoundaryThing);
+		WriteJump((void*)0x4961D4, SetSonicWinPose);
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
 		raceaicharacter = ParseCharacterID(settings->getString("", "RaceAICharacter"), Characters_Sonic);
