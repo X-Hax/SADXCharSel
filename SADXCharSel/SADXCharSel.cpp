@@ -5,6 +5,7 @@
 #include "SADXModLoader.h"
 #include "IniFile.hpp"
 #include "Indicator.h"
+#include "Trampoline.h"
 #include <algorithm>
 using std::string;
 using std::unordered_map;
@@ -206,12 +207,12 @@ void LoadCharacter_r()
 		obj->Data1->CharIndex = 0;
 		CharObj1Ptrs[0] = obj->Data1;
 		EntityData2Ptrs[0] = (EntityData2 *)obj->Data2;
-		PutPlayerAtStartPointIGuess(obj->Data1);
+		MovePlayerToStartPoint(obj->Data1);
 	}
 	else
 	{
 		obj = LoadCharObj(0);
-		PutPlayerAtStartPointIGuess(obj->Data1);
+		MovePlayerToStartPoint(obj->Data1);
 		ObjectMaster *lastobj = obj;
 		ObjectMaster *o2 = nullptr;
 		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
@@ -260,20 +261,13 @@ void LoadCharacter_r()
 	}
 }
 
-void ResetSelectedCharacter_i()
+void ResetSelectedCharacter();
+Trampoline CharSelLoadA_t(0x00512BC0, 0x00512BC6, ResetSelectedCharacter);
+void ResetSelectedCharacter()
 {
 	memset(selectedcharacter, -1, SizeOfArray(selectedcharacter));
-}
-
-const int loc_512BC6 = 0x512BC6;
-__declspec(naked) void ResetSelectedCharacter()
-{
-	__asm
-	{
-		call ResetSelectedCharacter_i
-		push 0x512B40
-		jmp loc_512BC6
-	}
+	VoidFunc(original, CharSelLoadA_t.Target());
+	original();
 }
 
 int GetCharacter0ID()
@@ -1202,7 +1196,6 @@ extern "C"
 		WriteCall((void*)0x41522C, SetSelectedCharacter);
 		WriteJump(LoadCharacter, LoadCharacter_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
-		WriteJump((void*)0x512BC1, ResetSelectedCharacter);
 		WriteJump((void*)0x490C6B, (void*)0x490C80); // prevent Big from automatically loading Big's HUD
 		WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
 		WriteCall((void*)0x427F2B, GetCharacter0ID); // fix ResetTime2() for Gamma
