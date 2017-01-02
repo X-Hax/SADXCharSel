@@ -130,7 +130,7 @@ static void DrawElement(Uint32 playerIndex, Uint32 textureIndex)
 		sp->tanim[arrow].cy = Indicator_TEXANIM[arrow].cy - ((isVisible) ? 0 : 12);
 	}
 	
-	SetSpriteColor(IsControllerEnabled((Uint8)playerIndex) ? &colors[charid] : &colors[9]);
+	SetMaterialAndSpriteColor(IsControllerEnabled((Uint8)playerIndex) ? &colors[charid] : &colors[9]);
 	Draw2DSprite(sp, textureIndex, -1.0f, flags, 0);
 }
 
