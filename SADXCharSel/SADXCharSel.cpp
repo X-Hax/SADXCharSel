@@ -1008,7 +1008,7 @@ extern "C"
 				obj->MainSub = charfuncs[selectedcharacter[i]];
 				if (selectedcharacter[i] == Characters_Eggman)
 					obj->DisplaySub = Eggman_Display;
-				obj->Data1->CharID = (char)selectedcharacter;
+				obj->Data1->CharID = (char)selectedcharacter[i];
 				obj->Data1->Action = 0;
 				if (!oldcol)
 				{
