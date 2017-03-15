@@ -1252,6 +1252,9 @@ extern "C"
 		WriteCall((void*)0x47B423, CheckKnucklesBoundaryThing);
 		WriteJump((void*)0x4961D4, SetSonicWinPose);
 		WriteJump((void*)0x476B59, SetKnucklesWinPose);
+		WriteCall((void*)0x4E966C, GetCharacter0ID); // fix ice cap snowboard 1
+		WriteCall((void*)0x4E9686, GetCharacter0ID); // fix ice cap snowboard 2
+		WriteCall((void*)0x597B1C, GetCharacter0ID); // fix sand hill snowboard
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
 		raceaicharacter = ParseCharacterID(settings->getString("", "RaceAICharacter"), Characters_Sonic);
