@@ -923,7 +923,7 @@ extern "C"
 	{
 		if (!IsGamePaused() && oldcol)
 		{
-			if (HIBYTE(oldcol->flags_b) & 0x80)
+			if (HIBYTE(oldcol->Flags) & 0x80)
 			{
 				if (oldcol->CollisionArray)
 				{
