@@ -131,7 +131,7 @@ static void DrawElement(Uint32 playerIndex, Uint32 textureIndex)
 	}
 	
 	SetMaterialAndSpriteColor(IsControllerEnabled((Uint8)playerIndex) ? &colors[charid] : &colors[9]);
-	Draw2DSprite(sp, textureIndex, -1.0f, flags, 0);
+	Draw2DSprite(sp, textureIndex, -1.0f, flags, (QueuedModelFlagsB)0);
 }
 
 Indicator::Indicator(ObjectMaster *obj) : GameObject(obj){ TexLoaded = false; }
