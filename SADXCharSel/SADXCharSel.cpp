@@ -1044,9 +1044,9 @@ extern "C"
 		{
 			char min, sec, fr;
 			GetTime2(&min, &sec, &fr);
-			if (min < 3)
+			int t = fr + (sec * 60) + (min * 3600);
+			if (t < 10800)
 			{
-				int t = fr + (sec * 60) + (min * 3600);
 				t = 10800 - t;
 				fr = t % 60;
 				sec = (t /= 60) % 60;
@@ -1059,9 +1059,9 @@ extern "C"
 		{
 			char min, sec, fr;
 			GetTime2(&min, &sec, &fr);
-			if (min < 2)
+			int t = fr + (sec * 60) + (min * 3600);
+			if (t < 10800)
 			{
-				int t = fr + (sec * 60) + (min * 3600);
 				t = 10800 - t;
 				fr = t % 60;
 				sec = (t /= 60) % 60;
