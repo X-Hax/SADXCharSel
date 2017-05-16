@@ -28,6 +28,7 @@ __declspec(naked) void ChangeStartPosCharLoading()
 __int16 selectedcharacter[PLAYER_COUNT] = { -1, -1, -1, -1 };
 int raceaicharacter = Characters_Sonic;
 int tailsaicharacter = Characters_Tails;
+bool enableindicator = true;
 
 int GetSelectedCharacter()
 {
@@ -257,7 +258,8 @@ void LoadCharacter_r()
 				obj->Data1->Position.z = lastobj->Data1->Position.z - njSin(lastobj->Data1->Rotation.y) * 10;
 				lastobj = obj;
 			}
-		InitIndicator();
+		if (enableindicator)
+			InitIndicator();
 	}
 }
 
@@ -1259,6 +1261,7 @@ extern "C"
 		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
 		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
 		raceaicharacter = ParseCharacterID(settings->getString("", "RaceAICharacter"), Characters_Sonic);
+		enableindicator = settings->getBool("", "EnableIndicator", true);
 		delete settings;
 	}
 
