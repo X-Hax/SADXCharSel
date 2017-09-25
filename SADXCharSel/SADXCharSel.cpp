@@ -1012,7 +1012,7 @@ extern "C"
 					obj->DisplaySub = Eggman_Display;
 				obj->Data1->CharID = (char)selectedcharacter[i];
 				obj->Data1->Action = 0;
-				obj->Data1->Status &= ~(Status_Attack | Status_Ball | Status_LightDash);
+				obj->Data1->Status &= ~(Status_Attack | Status_Ball | Status_LightDash | Status_Unknown3);
 				if (!oldcol)
 				{
 					oldcol = obj->Data1->CollisionInfo;
