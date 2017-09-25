@@ -813,7 +813,7 @@ void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
 		stru_91BB6C.texid = 24;
 	else
 		stru_91BB6C.texid = selectedcharacter[0] + 12;
-	njDrawSprite2D_3(_sp, n, pri, attr);
+	njDrawSprite2D_ForcePriority(_sp, n, pri, attr);
 }
 
 FunctionPointer(int, sub_4751B0, (EntityData1 *), 0x4751B0);
@@ -1208,8 +1208,8 @@ extern "C"
 		WriteCall((void*)0x4266C9, GetCharacter0ID); // fix Gamma's time bonus
 		WriteCall((void*)0x426379, GetCharacter0ID); // fix Gamma's time display
 		WriteJump((void*)0x47A907, (void*)0x47A936); // prevent Knuckles from automatically loading Emerald radar
-		WriteData((void*)0x475E7C, 0x90u, 6); // make radar work when not Knuckles
-		WriteData((void*)0x4764CC, 0x90u, 6); // make Tikal hints work when not Knuckles
+		WriteData<6>((void*)0x475E7C, 0x90u); // make radar work when not Knuckles
+		WriteData<6>((void*)0x4764CC, 0x90u); // make Tikal hints work when not Knuckles
 		WriteCall((void*)0x4D677C, GetCharacter0ID); // fix item boxes for Gamma
 		WriteCall((void*)0x4D6786, GetCharacter0ID); // fix item boxes for Big
 		WriteCall((void*)0x4D6790, GetCharacter0ID); // fix item boxes for Sonic
@@ -1230,7 +1230,7 @@ extern "C"
 		WriteJump(LoadLevelResults, LoadLevelResults_r);
 		WriteData((char*)0x4879C1, (char)0x90);
 		WriteCall((void*)0x4879C2, SetAmyWinPose);
-		WriteData((void*)0x7A2061, 0x90u, 2); // make balloon work for all characters
+		WriteData<2>((void*)0x7A2061, 0x90u); // make balloon work for all characters
 		WriteCall((void*)0x61CB77, GetCurrentCharacterID); // make Twinkle Park playable
 		WriteCall((void*)0x61CF8D, GetCurrentCharacterID); // ''
 		WriteJump((void*)0x42850A, PlayPostResultsVoice1);
@@ -1247,7 +1247,7 @@ extern "C"
 		WriteCall((void*)0x4FA352, OFrog_CheckTouch); // fix for Big in Tails levels
 		WriteCall((void*)0x44B0A4, CheckDeleteAnimThing);
 		ReplaceSETObject(Froggy_Main, CheckLoadFroggy);
-		WriteData((void*)0x48ADA5, 0x90u, 6); // prevent Amy from loading the bird
+		WriteData<6>((void*)0x48ADA5, 0x90u); // prevent Amy from loading the bird
 		WriteCall((void*)0x46FC91, SetBigLifeTex); // fix life icon in Big levels
 		WriteCall((void*)0x478937, CheckKnucklesBoundaryThing);
 		WriteCall((void*)0x478AFC, CheckKnucklesBoundaryThing);
