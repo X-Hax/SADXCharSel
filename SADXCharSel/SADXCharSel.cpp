@@ -26,6 +26,9 @@ __declspec(naked) void ChangeStartPosCharLoading()
 }
 
 __int16 selectedcharacter[PLAYER_COUNT] = { -1, -1, -1, -1 };
+short defaultcharacters[Characters_MetalSonic] = { Characters_Sonic, Characters_Eggman, Characters_Tails, Characters_Knuckles, Characters_Tikal, Characters_Amy, Characters_Gamma, Characters_Big };
+short bosscharacters[] = { Characters_Sonic, Characters_Knuckles, Characters_Gamma };
+short bossai[] = { Characters_Sonic,Characters_Knuckles,Characters_Gamma };
 int raceaicharacter = Characters_Sonic;
 int tailsaicharacter = Characters_Tails;
 bool enableindicator = true;
@@ -70,7 +73,7 @@ FunctionPointer(void, sub_404A60, (int), 0x404A60);
 void __cdecl SetSelectedCharacter(int arg)
 {
 	if (selectedcharacter[0] == -1)
-		selectedcharacter[0] = CurrentCharacter;
+		selectedcharacter[0] = defaultcharacters[CurrentCharacter];
 	ChooseSelectedCharacter(0);
 	sub_404A60(arg);
 }
@@ -860,6 +863,52 @@ __declspec(naked) void SetKnucklesWinPose()
 	}
 }
 
+struct CharBossData
+{
+	int BossID;
+	ObjectMaster *Player1;
+	ObjectMaster *BossCharacter;
+	int anonymous_3;
+	void(__cdecl *DeleteFunc)();
+};
+void __cdecl LoadCharBoss_r(CharBossData *a1)
+{
+	if (a1)
+	{
+		if (a1->BossID < 6)
+		{
+			short c = bosscharacters[a1->BossID / 2];
+			ObjectMaster *v1 = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[c]);
+			v1->Data1->CharID = (char)c;
+			v1->Data1->CharIndex = 1;
+			a1->BossCharacter = v1;
+		}
+		else
+			a1->BossCharacter = nullptr;
+	}
+}
+
+DataPointer(int, CharacterBossActive, 0x3C581F8);
+FunctionPointer(ObjectMaster *, LoadSonicBossAI, (CharBossData *a1), 0x4B7030);
+FunctionPointer(ObjectMaster *, LoadKnucklesBossAI, (CharBossData *a1), 0x4D6590);
+FunctionPointer(ObjectMaster *, LoadGammaBossAI, (CharBossData *a1), 0x4D5CF0);
+ObjectFunc(SetupCharBossArena, 0x4B6D20);
+int bossids[] = { 0, 0, 0, 2, 0, 0, 4, 0 };
+decltype(LoadSonicBossAI) bossaifuncs[] = { LoadSonicBossAI, LoadKnucklesBossAI, LoadGammaBossAI };
+ObjectMaster *__cdecl LoadCharBossAI_r(CharBossData *a1)
+{
+	CharacterBossActive = 1;
+	a1->anonymous_3 = 0;
+	if (a1->BossID < 6)
+	{
+		a1->BossID = bossids[bossai[a1->BossID / 2]] | (a1->BossID & 1);
+		ObjectMaster *v1 = bossaifuncs[a1->BossID / 2](a1);
+		SetupCharBossArena(v1);
+		return v1;
+	}
+	return nullptr;
+}
+
 void Teleport(uint8_t to, uint8_t from)
 {
 	if (CharObj1Ptrs[to] == nullptr || CharObj1Ptrs[from] == nullptr)
@@ -874,6 +923,8 @@ void Teleport(uint8_t to, uint8_t from)
 	CharObj1Ptrs[from]->Action = 1;
 	CharObj1Ptrs[from]->Status &= ~Status_Attack;
 }
+
+const string charnames[Characters_MetalSonic] = { "Sonic", "Eggman", "Tails", "Knuckles", "Tikal", "Amy", "Gamma", "Big" };
 
 DataArray(int, PressedButtons, 0x3B0E354, 8);
 bool redirect = false;
@@ -1198,6 +1249,8 @@ extern "C"
 
 		WriteCall((void*)0x41522C, SetSelectedCharacter);
 		WriteJump(LoadCharacter, LoadCharacter_r);
+		WriteJump(LoadCharBoss, LoadCharBoss_r);
+		WriteJump((void*)0x4B71A0, LoadCharBossAI_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
 		WriteJump((void*)0x490C6B, (void*)0x490C80); // prevent Big from automatically loading Big's HUD
 		WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
@@ -1258,10 +1311,18 @@ extern "C"
 		WriteCall((void*)0x4E966C, GetCharacter0ID); // fix ice cap snowboard 1
 		WriteCall((void*)0x4E9686, GetCharacter0ID); // fix ice cap snowboard 2
 		WriteCall((void*)0x597B1C, GetCharacter0ID); // fix sand hill snowboard
-		const IniFile *settings = new IniFile(std::string(path) + "\\mod.ini");
-		tailsaicharacter = ParseCharacterID(settings->getString("", "TailsAICharacter"), Characters_Tails);
-		raceaicharacter = ParseCharacterID(settings->getString("", "RaceAICharacter"), Characters_Sonic);
-		enableindicator = settings->getBool("", "EnableIndicator", true);
+		const IniFile *settings = new IniFile(std::string(path) + "\\config.ini");
+		for (int i = 0; i < Characters_MetalSonic; i++)
+			defaultcharacters[i] = ParseCharacterID(settings->getString("Player1", charnames[i]), (Characters)i);
+		tailsaicharacter = ParseCharacterID(settings->getString("Player2", "TailsAICharacter"), Characters_Tails);
+		raceaicharacter = ParseCharacterID(settings->getString("Player2", "RaceAICharacter"), Characters_Sonic);
+		bosscharacters[0] = ParseCharacterID(settings->getString("CharBoss", "SonicChar"), Characters_Sonic);
+		bossai[0] = ParseCharacterID(settings->getString("CharBoss", "SonicAI"), Characters_Sonic);
+		bosscharacters[1] = ParseCharacterID(settings->getString("CharBoss", "KnucklesChar"), Characters_Knuckles);
+		bossai[1] = ParseCharacterID(settings->getString("CharBoss", "KnucklesAI"), Characters_Knuckles);
+		bosscharacters[2] = ParseCharacterID(settings->getString("CharBoss", "GammaChar"), Characters_Gamma);
+		bossai[2] = ParseCharacterID(settings->getString("CharBoss", "GammaAI"), Characters_Gamma);
+		enableindicator = settings->getBool("Misc", "EnableIndicator", true);
 		delete settings;
 	}
 
