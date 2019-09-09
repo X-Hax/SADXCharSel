@@ -14,6 +14,7 @@
     <ProjectGuid>{AF0AE8D7-DC9C-4469-88C4-8CD77B5048F0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>SADXCharSel</RootNamespace>
+    <WindowsTargetPlatformVersion>7.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

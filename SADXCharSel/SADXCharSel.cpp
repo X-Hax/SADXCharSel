@@ -32,26 +32,27 @@ short bossai[] = { Characters_Sonic,Characters_Knuckles,Characters_Gamma };
 int raceaicharacter = Characters_Sonic;
 int tailsaicharacter = Characters_Tails;
 bool enableindicator = true;
+bool MetalSonicFlags[8];
 
 int GetSelectedCharacter()
 {
 	return selectedcharacter[0];
 }
 
-DataArray(int, HeldButtons, 0x3B0E3A8, 8);
+DataArray(int, HeldButtons2, 0x3B0E3A8, 8);
 
 void ChooseSelectedCharacter(int i)
 {
-	int btn = HeldButtons[i];
+	int btn = HeldButtons2[i];
 	if (btn & Buttons_Left)
 	{
 		selectedcharacter[i] = Characters_Sonic;
-		MetalSonicFlag = 0;
+		MetalSonicFlags[i] = 0;
 	}
 	if (btn & Buttons_B)
 	{
 		selectedcharacter[i] = Characters_Sonic;
-		MetalSonicFlag = 1;
+		MetalSonicFlags[i] = 1;
 	}
 	if (btn & Buttons_X)
 		selectedcharacter[i] = Characters_Eggman;
@@ -106,7 +107,6 @@ ObjectFuncPtr charfuncs[] = {
 	Big_Main
 };
 
-DataArray(EntityData2 *, EntityData2Ptrs, 0x3B36DD0, 8);
 ObjectMaster *LoadCharObj(int i)
 {
 	ObjectMaster *obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter[i]]);
@@ -114,7 +114,7 @@ ObjectMaster *LoadCharObj(int i)
 	if (selectedcharacter[i] == Characters_Eggman)
 		obj->DisplaySub = Eggman_Display;
 	obj->Data1->CharIndex = (char)i;
-	CharObj1Ptrs[i] = obj->Data1;
+	EntityData1Ptrs[i] = obj->Data1;
 	EntityData2Ptrs[i] = (EntityData2 *)obj->Data2;
 	return obj;
 }
@@ -129,9 +129,6 @@ int tailsracelevels[] = {
 
 bool isracelevel = false;
 
-DataPointer(int, RaceWinnerPlayer, 0x3C53A94);
-DataPointer(int, FastSonicAI, 0x3C53AB8);
-DataPointer(int, AICourse, 0x3C539EC);
 DataPointer(char, byte_3B2A2F1, 0x3B2A2F1);
 ObjectMaster *LoadTailsOpponent_r()
 {
@@ -209,7 +206,7 @@ void LoadCharacter_r()
 		obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, Tornado_Main);
 		obj->Data1->CharID = (char)CurrentCharacter;
 		obj->Data1->CharIndex = 0;
-		CharObj1Ptrs[0] = obj->Data1;
+		EntityData1Ptrs[0] = obj->Data1;
 		EntityData2Ptrs[0] = (EntityData2 *)obj->Data2;
 		MovePlayerToStartPoint(obj->Data1);
 	}
@@ -219,7 +216,7 @@ void LoadCharacter_r()
 		MovePlayerToStartPoint(obj->Data1);
 		ObjectMaster *lastobj = obj;
 		ObjectMaster *o2 = nullptr;
-		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
+		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlags[0])
 			o2 = Load2PTails_r(obj);
 		switch (CurrentCharacter)
 		{
@@ -307,7 +304,7 @@ void __cdecl PlayStandardResultsVoice()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 			return;
 		else if (bosslevel)
 			Load_DelayedSound_Voice(1843);
@@ -412,8 +409,8 @@ VoidFunc(sub_457D00, 0x457D00);
 void __cdecl sub_4141F0(ObjectMaster *obj)
 {
 	EntityData1 *v1 = GetCharacterObject(0)->Data1;
-	if (CharObj1Ptrs[1] && sub_46A820() && sub_46A7F0() == 1)
-		v1 = CharObj1Ptrs[1];
+	if (EntityData1Ptrs[1] && sub_46A820() && sub_46A7F0() == 1)
+		v1 = EntityData1Ptrs[1];
 	if (v1->Status & 3)
 	{
 		for (int i = 0; i < PLAYER_COUNT; i++)
@@ -464,7 +461,6 @@ void __cdecl sub_4141F0(ObjectMaster *obj)
 	}
 }
 
-DataPointer(short, PauseEnabled, 0x90BF1C);
 DataPointer(NJS_VECTOR, stru_3B2C6DC, 0x3B2C6DC);
 DataPointer(NJS_VECTOR, stru_3B2C6D0, 0x3B2C6D0);
 VoidFunc(sub_5919E0, 0x5919E0);
@@ -538,8 +534,8 @@ void __cdecl LoadLevelResults_r()
 		a2.x = -36.072899f;
 		a2.y = 5.7132001f;
 		a2.z = -1.5176001f;
-		sub_43EC90(CharObj1Ptrs[0], &a2);
-		a1 = CharObj1Ptrs[0]->CollisionInfo->CollisionArray->v;
+		sub_43EC90(EntityData1Ptrs[0], &a2);
+		a1 = EntityData1Ptrs[0]->CollisionInfo->CollisionArray->origin;
 		stru_3B2C6DC = a1;
 		njSubVector(&a1, &a2);
 		stru_3B2C6D0 = a1;
@@ -564,7 +560,7 @@ void PlayPostResultsVoice1_i()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 		{
 			PlayVoice(2044);
 			return;
@@ -605,7 +601,7 @@ void PlayPostResultsVoice2_i()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 		{
 			PlayVoice(2044);
 			return;
@@ -645,7 +641,7 @@ void PlayPostResultsVoice3_i()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 		{
 			PlayVoice(2044);
 			return;
@@ -742,7 +738,6 @@ __declspec(naked) void OFrog_CheckTouch()
 	}
 }
 
-DataArray(ObjectList *, ObjLists, 0x974AF8, 344);
 void ReplaceSETObject(ObjectFuncPtr find, ObjectFuncPtr replace)
 {
 	for (size_t i = 0; i < ObjLists_Length; i++)
@@ -804,7 +799,7 @@ FunctionPointer(void, sub_43FA90, (EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
 void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
 {
 	for (int i = 0; i < 8; i++)
-		if (CharObj1Ptrs[i] && CharObj1Ptrs[i] != a1 && CharObj1Ptrs[i]->CharID == a1->CharID)
+		if (EntityData1Ptrs[i] && EntityData1Ptrs[i] != a1 && EntityData1Ptrs[i]->CharID == a1->CharID)
 			return;
 	sub_43FA90(a1, a2, a3);
 }
@@ -812,7 +807,7 @@ void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
 DataPointer(NJS_TEXANIM, stru_91BB6C, 0x91BB6C);
 void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
 {
-	if (MetalSonicFlag)
+	if (MetalSonicFlags[0])
 		stru_91BB6C.texid = 24;
 	else
 		stru_91BB6C.texid = selectedcharacter[0] + 12;
@@ -863,14 +858,7 @@ __declspec(naked) void SetKnucklesWinPose()
 	}
 }
 
-struct CharBossData
-{
-	int BossID;
-	ObjectMaster *Player1;
-	ObjectMaster *BossCharacter;
-	int anonymous_3;
-	void(__cdecl *DeleteFunc)();
-};
+
 void __cdecl LoadCharBoss_r(CharBossData *a1)
 {
 	if (a1)
@@ -888,11 +876,6 @@ void __cdecl LoadCharBoss_r(CharBossData *a1)
 	}
 }
 
-DataPointer(int, CharacterBossActive, 0x3C581F8);
-FunctionPointer(ObjectMaster *, LoadSonicBossAI, (CharBossData *a1), 0x4B7030);
-FunctionPointer(ObjectMaster *, LoadKnucklesBossAI, (CharBossData *a1), 0x4D6590);
-FunctionPointer(ObjectMaster *, LoadGammaBossAI, (CharBossData *a1), 0x4D5CF0);
-ObjectFunc(SetupCharBossArena, 0x4B6D20);
 int bossids[] = { 0, 0, 0, 2, 0, 0, 4, 0 };
 decltype(LoadSonicBossAI) bossaifuncs[] = { LoadSonicBossAI, LoadKnucklesBossAI, LoadGammaBossAI };
 ObjectMaster *__cdecl LoadCharBossAI_r(CharBossData *a1)
@@ -911,22 +894,46 @@ ObjectMaster *__cdecl LoadCharBossAI_r(CharBossData *a1)
 
 void Teleport(uint8_t to, uint8_t from)
 {
-	if (CharObj1Ptrs[to] == nullptr || CharObj1Ptrs[from] == nullptr)
+	if (EntityData1Ptrs[to] == nullptr || EntityData1Ptrs[from] == nullptr)
 		return;
 
-	CharObj1Ptrs[from]->Position = CharObj1Ptrs[to]->Position;
-	CharObj1Ptrs[from]->Rotation = CharObj1Ptrs[to]->Rotation;
+	EntityData1Ptrs[from]->Position = EntityData1Ptrs[to]->Position;
+	EntityData1Ptrs[from]->Rotation = EntityData1Ptrs[to]->Rotation;
 
 	if (CharObj2Ptrs[from] != nullptr)
 		CharObj2Ptrs[from]->Speed = {};
 
-	CharObj1Ptrs[from]->Action = 1;
-	CharObj1Ptrs[from]->Status &= ~Status_Attack;
+	EntityData1Ptrs[from]->Action = 1;
+	EntityData1Ptrs[from]->Status &= ~Status_Attack;
 }
 
 const string charnames[Characters_MetalSonic] = { "Sonic", "Eggman", "Tails", "Knuckles", "Tikal", "Amy", "Gamma", "Big" };
 
-DataArray(int, PressedButtons, 0x3B0E354, 8);
+DataPointer(char, IsTrialCharSel, 0x3B2A2FA);
+
+void SwapSonicTextures(NJS_TEXLIST* sonictex) {
+	if (GameMode == GameModes_Menu) return;
+	
+	if (MetalSonicFlag == 1) {
+		njSetTexture(&METALSONIC_TEXLIST);
+	}
+	else {
+		njSetTexture(sonictex);
+	}
+}
+
+void SwapMetalSonic(EntityData1 *entity1, EntityData2 *entity2, CharObj2 *obj2) {
+	//if metal sonic is selected, swap the flag
+	if (MetalSonicFlags[entity1->CharIndex] == true) {
+		MetalSonicFlag = 1;
+	}
+	else {
+		MetalSonicFlag = 0;
+	}
+
+	Sonic_Act1(entity1, entity2, obj2);
+}
+
 bool redirect = false;
 
 extern "C"
@@ -987,13 +994,23 @@ extern "C"
 			FreeMemory(oldcol);
 			oldcol = nullptr;
 		}
+
+		if (GameMode == GameModes_Menu) {
+			if (IsTrialCharSel && (CharacterSelection & 0x600)) {
+				MetalSonicFlags[0] = true;
+			}
+			else {
+				MetalSonicFlags[0] = false;
+			}
+		}
+
 		if (GameMode == GameModes_Menu || CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2 || !GetCharacterObject(0))
 			return;
 		short oldchar[PLAYER_COUNT];
 		memcpy(oldchar, selectedcharacter, SizeOfArray(selectedcharacter));
 		for (int i = 0; i < PLAYER_COUNT; i++)
 		{
-			int btn = HeldButtons[i];
+			int btn = HeldButtons2[i];
 			if (btn & Buttons_C && GetCharacterObject(i))
 			{
 				if (btn & Buttons_Up)
@@ -1017,7 +1034,7 @@ extern "C"
 						DeleteObject_(obj);
 				}
 				int sc = selectedcharacter[i];
-				if (sc == Characters_Sonic && MetalSonicFlag)
+				if (sc == Characters_Sonic && MetalSonicFlags[i])
 					sc = Characters_MetalSonic;
 				int textpos = (i * 19 + 1) << 16 | 0xA;
 				SetDebugFontSize((unsigned short)(8 * min(VerticalStretch, HorizontalStretch)));
@@ -1038,13 +1055,13 @@ extern "C"
 			if (selectedcharacter[i] == oldchar[i])
 			{
 				if (selectedcharacter[i] == Characters_Sonic)
-					if (MetalSonicFlag)
+					if (MetalSonicFlags[i])
 					{
-						if (btn & Buttons_B)
+						if (btn & Buttons_B) {
 							LoadCharTextures(Characters_MetalSonic);
+							LoadPVM("ava_metal_sonic", &ava_metal_sonic_TEXLIST);
+						}
 					}
-					else if (btn & Buttons_Left)
-						UnloadCharTextures(Characters_MetalSonic);
 				continue;
 			}
 			if (GetCharacterObject(i))
@@ -1070,7 +1087,7 @@ extern "C"
 					obj->Data1->CollisionInfo = nullptr;
 				}
 				else
-					FreeCollision(obj);
+					Collision_Free(obj);
 				obj->MainSub(obj);
 				obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
 				obj2->Powerups = powerups;
@@ -1129,7 +1146,7 @@ extern "C"
 			switch (selectedcharacter[0])
 			{
 			default:
-				if (MetalSonicFlag)
+				if (MetalSonicFlags[0])
 					LoadSoundList(62);
 				else
 					LoadSoundList(1);
@@ -1184,7 +1201,7 @@ extern "C"
 			switch (selectedcharacter[0])
 			{
 			default:
-				if (MetalSonicFlag)
+				if (MetalSonicFlags[0])
 					LoadSoundList(62);
 				else
 					LoadSoundList(1);
@@ -1311,6 +1328,8 @@ extern "C"
 		WriteCall((void*)0x4E966C, GetCharacter0ID); // fix ice cap snowboard 1
 		WriteCall((void*)0x4E9686, GetCharacter0ID); // fix ice cap snowboard 2
 		WriteCall((void*)0x597B1C, GetCharacter0ID); // fix sand hill snowboard
+		WriteCall((void*)0x49AA34, SwapMetalSonic); // change Metal Sonic flag before Sonic_Main
+		WriteCall((void*)0x4949ED, SwapSonicTextures); // use the correct texture for Sonic / Metal Sonic 
 		const IniFile *settings = new IniFile(std::string(path) + "\\config.ini");
 		for (int i = 0; i < Characters_MetalSonic; i++)
 			defaultcharacters[i] = ParseCharacterID(settings->getString("Player1", charnames[i]), (Characters)i);

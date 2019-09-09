@@ -94,7 +94,7 @@ double GetAngle(const T& source, const T& target)
 
 static void DrawElement(Uint32 playerIndex, Uint32 textureIndex)
 {
-	EntityData1* player = CharObj1Ptrs[playerIndex];
+	EntityData1* player = EntityData1Ptrs[playerIndex];
 
 	if (player == nullptr)
 		return;
