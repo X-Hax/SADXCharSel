@@ -32,7 +32,7 @@ short bossai[] = { Characters_Sonic,Characters_Knuckles,Characters_Gamma };
 int raceaicharacter = Characters_Sonic;
 int tailsaicharacter = Characters_Tails;
 bool enableindicator = true;
-bool MetalSonicFlags[8];
+bool MetalSonicFlags[PLAYER_COUNT];
 
 int GetSelectedCharacter()
 {
@@ -922,16 +922,41 @@ void SwapSonicTextures(NJS_TEXLIST* sonictex) {
 	}
 }
 
-void SwapMetalSonic(EntityData1 *entity1, EntityData2 *entity2, CharObj2 *obj2) {
-	//if metal sonic is selected, swap the flag
-	if (MetalSonicFlags[entity1->CharIndex] == true) {
+inline void SetMetalSonicFlag(uint8_t id) {
+	//if metal sonic is selected for the current character, swap the flag
+
+	if (MetalSonicFlags[id] == true) {
 		MetalSonicFlag = 1;
 	}
 	else {
 		MetalSonicFlag = 0;
 	}
+}
 
-	Sonic_Act1(entity1, entity2, obj2);
+void Sonic_Display_r(ObjectMaster* obj);
+Trampoline Sonic_Display_t(0x4948C0, 0x4948C7, Sonic_Display_r);
+void __cdecl Sonic_Display_r(ObjectMaster *obj)
+{
+	if (GameState == 16) {
+		// do the swap when the game is paused, since the main function is discarded
+		// fixes metal sonic reverting to sonic
+		SetMetalSonicFlag(obj->Data1->CharIndex);
+	}
+
+	ObjectFunc(origin, Sonic_Display_t.Target());
+	origin(obj);
+}
+
+void Sonic_Main_r(ObjectMaster* obj);
+Trampoline Sonic_Main_t(0x49A9B0, 0x49A9B7, Sonic_Main_r);
+void Sonic_Main_r(ObjectMaster* obj) {
+	SetMetalSonicFlag(obj->Data1->CharIndex);
+	
+	ObjectFunc(origin, Sonic_Main_t.Target());
+	origin(obj);
+
+	// reset the flag to the state of player 1
+	MetalSonicFlag = MetalSonicFlags[0];
 }
 
 bool redirect = false;
@@ -994,7 +1019,6 @@ extern "C"
 			FreeMemory(oldcol);
 			oldcol = nullptr;
 		}
-
 		if (GameMode == GameModes_Menu) {
 			if (IsTrialCharSel && (CharacterSelection & 0x600)) {
 				MetalSonicFlags[0] = true;
@@ -1003,7 +1027,6 @@ extern "C"
 				MetalSonicFlags[0] = false;
 			}
 		}
-
 		if (GameMode == GameModes_Menu || CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2 || !GetCharacterObject(0))
 			return;
 		short oldchar[PLAYER_COUNT];
@@ -1328,7 +1351,6 @@ extern "C"
 		WriteCall((void*)0x4E966C, GetCharacter0ID); // fix ice cap snowboard 1
 		WriteCall((void*)0x4E9686, GetCharacter0ID); // fix ice cap snowboard 2
 		WriteCall((void*)0x597B1C, GetCharacter0ID); // fix sand hill snowboard
-		WriteCall((void*)0x49AA34, SwapMetalSonic); // change Metal Sonic flag before Sonic_Main
 		WriteCall((void*)0x4949ED, SwapSonicTextures); // use the correct texture for Sonic / Metal Sonic 
 		const IniFile *settings = new IniFile(std::string(path) + "\\config.ini");
 		for (int i = 0; i < Characters_MetalSonic; i++)
