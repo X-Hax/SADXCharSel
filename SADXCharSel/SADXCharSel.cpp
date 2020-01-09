@@ -12,7 +12,6 @@ using std::unordered_map;
 using std::vector;
 using std::transform;
 
-
 const int loc_414914 = 0x414914;
 __declspec(naked) void ChangeStartPosCharLoading()
 {
@@ -32,10 +31,24 @@ short bossai[] = { Characters_Sonic,Characters_Knuckles,Characters_Gamma };
 int raceaicharacter = Characters_Sonic;
 int tailsaicharacter = Characters_Tails;
 bool enableindicator = true;
+bool MetalSonicFlags[PLAYER_COUNT];
+int currentplayer;
 
 int GetSelectedCharacter()
 {
 	return selectedcharacter[0];
+}
+
+void CheckUnloadMetalTexs() {
+	uint8_t player = PLAYER_COUNT;
+	while (1) {
+		if (MetalSonicFlags[player] == true) return;
+		if (player == 0) {
+			UnloadCharTextures(Characters_MetalSonic);
+			return;
+		}
+		player--;
+	}
 }
 
 void ChooseSelectedCharacter(int i)
@@ -44,12 +57,22 @@ void ChooseSelectedCharacter(int i)
 	if (btn & Buttons_Left)
 	{
 		selectedcharacter[i] = Characters_Sonic;
-		MetalSonicFlag = 0;
+
+		if (MetalSonicFlags[i] == true) {
+			MetalSonicFlags[i] = false;
+			CheckUnloadMetalTexs();
+			LoadSoundList(1);
+		}
 	}
 	if (btn & Buttons_B)
 	{
 		selectedcharacter[i] = Characters_Sonic;
-		MetalSonicFlag = 1;
+
+		if (MetalSonicFlags[i] == false) {
+			MetalSonicFlags[i] = true;
+			LoadSoundList(62);
+			LoadCharTextures(Characters_MetalSonic);
+		}
 	}
 	if (btn & Buttons_X)
 		selectedcharacter[i] = Characters_Eggman;
@@ -65,6 +88,11 @@ void ChooseSelectedCharacter(int i)
 		selectedcharacter[i] = Characters_Gamma;
 	if (btn & Buttons_Up)
 		selectedcharacter[i] = Characters_Big;
+
+	if (MetalSonicFlags[i] == true && selectedcharacter[i] != Characters_Sonic) {
+		MetalSonicFlags[i] = false;
+		CheckUnloadMetalTexs();
+	}
 }
 
 FunctionPointer(void, sub_404A60, (int), 0x404A60);
@@ -168,7 +196,7 @@ ObjectMaster *Load2PTails_r(ObjectMaster *player1)
 {
 	if (!TailsAI_ptr
 		&& (((CurrentAct | (unsigned __int16)(CurrentLevel << 8)) & 0xFF00) == LevelAndActIDs_Casinopolis1
-		|| CheckTailsAI()))
+			|| CheckTailsAI()))
 	{
 		ObjectMaster *v1 = LoadObject(LoadObj_Data1, 0, TailsAI_Main);
 		TailsAI_ptr = v1;
@@ -213,7 +241,7 @@ void LoadCharacter_r()
 		MovePlayerToStartPoint(obj->Data1);
 		ObjectMaster *lastobj = obj;
 		ObjectMaster *o2 = nullptr;
-		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlag)
+		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlags[0])
 			o2 = Load2PTails_r(obj);
 		switch (CurrentCharacter)
 		{
@@ -223,8 +251,8 @@ void LoadCharacter_r()
 		case Characters_Knuckles:
 			if (sub_42FB00() != 1
 				&& (GameMode == GameModes_Adventure_ActionStg
-				|| GameMode == GameModes_Mission
-				|| GameMode == GameModes_Trial))
+					|| GameMode == GameModes_Mission
+					|| GameMode == GameModes_Trial))
 			{
 				LoadObject(LoadObj_Data1, 6, EmeraldRadarHud_Load_Load);
 			}
@@ -301,7 +329,7 @@ void __cdecl PlayStandardResultsVoice()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 			return;
 		else if (bosslevel)
 			Load_DelayedSound_Voice(1843);
@@ -557,7 +585,7 @@ void PlayPostResultsVoice1_i()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 		{
 			PlayVoice(2044);
 			return;
@@ -598,7 +626,7 @@ void PlayPostResultsVoice2_i()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 		{
 			PlayVoice(2044);
 			return;
@@ -638,7 +666,7 @@ void PlayPostResultsVoice3_i()
 	switch (GetCharacter0ID())
 	{
 	case Characters_Sonic:
-		if (MetalSonicFlag)
+		if (MetalSonicFlags[0])
 		{
 			PlayVoice(2044);
 			return;
@@ -804,7 +832,7 @@ void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
 DataPointer(NJS_TEXANIM, stru_91BB6C, 0x91BB6C);
 void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
 {
-	if (MetalSonicFlag)
+	if (MetalSonicFlags[0])
 		stru_91BB6C.texid = 24;
 	else
 		stru_91BB6C.texid = selectedcharacter[0] + 12;
@@ -855,6 +883,7 @@ __declspec(naked) void SetKnucklesWinPose()
 	}
 }
 
+
 void __cdecl LoadCharBoss_r(CharBossData *a1)
 {
 	if (a1)
@@ -903,7 +932,386 @@ void Teleport(uint8_t to, uint8_t from)
 	EntityData1Ptrs[from]->Status &= ~Status_Attack;
 }
 
-const string charnames[Characters_MetalSonic] = { "Sonic", "Eggman", "Tails", "Knuckles", "Tikal", "Amy", "Gamma", "Big" };
+const string charnames[8] = { "Sonic", "Eggman", "Tails", "Knuckles", "Tikal", "Amy", "Gamma", "Big" };
+
+DataPointer(char, IsTrialCharSel, 0x3B2A2FA);
+
+void SwapSonicTextures(NJS_TEXLIST* sonictex) {
+	if (GameMode == GameModes_Menu) return;
+
+	if (MetalSonicFlag == 1) {
+		njSetTexture(&METALSONIC_TEXLIST);
+	}
+	else {
+		njSetTexture(sonictex);
+	}
+}
+
+inline void SetMetalSonicFlag(uint8_t id) {
+	//if metal sonic is selected for the current character, swap the flag
+
+	if (MetalSonicFlags[id] == true) {
+		MetalSonicFlag = 1;
+	}
+	else {
+		MetalSonicFlag = 0;
+	}
+}
+
+void Sonic_Display_r(ObjectMaster* obj);
+Trampoline Sonic_Display_t(0x4948C0, 0x4948C7, Sonic_Display_r);
+void __cdecl Sonic_Display_r(ObjectMaster *obj)
+{
+	if (GameState == 16) {
+		// do the swap when the game is paused, since the main function is discarded
+		// fixes metal sonic reverting to sonic
+		SetMetalSonicFlag(obj->Data1->CharIndex);
+	}
+
+	ObjectFunc(origin, Sonic_Display_t.Target());
+	origin(obj);
+}
+
+void Sonic_Main_r(ObjectMaster* obj);
+Trampoline Sonic_Main_t(0x49A9B0, 0x49A9B7, Sonic_Main_r);
+void Sonic_Main_r(ObjectMaster* obj) {
+	SetMetalSonicFlag(obj->Data1->CharIndex);
+	currentplayer = obj->Data1->CharIndex;
+
+	ObjectFunc(origin, Sonic_Main_t.Target());
+	origin(obj);
+
+	// reset the flag to the state of player 1
+	MetalSonicFlag = MetalSonicFlags[0];
+}
+
+void Tails_Jiggle_Main_r(ObjectMaster* obj);
+Trampoline Tails_Jiggle_Main_t(0x45B840, 0x45B847, Tails_Jiggle_Main_r);
+void Tails_Jiggle_Main_r(ObjectMaster* obj) {
+	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Tails) {
+		CheckThingButThenDeleteObject(obj);
+		return;
+	}
+
+	ObjectFunc(origin, Tails_Jiggle_Main_t.Target());
+	origin(obj);
+}
+
+void Knuckles_Jiggle_Main_r(ObjectMaster* obj);
+Trampoline Knuckles_Jiggle_Main_t(0x473CE0, 0x473CE7, Knuckles_Jiggle_Main_r);
+void Knuckles_Jiggle_Main_r(ObjectMaster* obj) {
+	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Knuckles) {
+		CheckThingButThenDeleteObject(obj);
+		return;
+	}
+
+	ObjectFunc(origin, Knuckles_Jiggle_Main_t.Target());
+	origin(obj);
+}
+
+void Amy_Jiggle_Main_r(ObjectMaster* obj);
+Trampoline Amy_Jiggle_Main_t(0x485F40, 0x485F47, Amy_Jiggle_Main_r);
+void Amy_Jiggle_Main_r(ObjectMaster* obj) {
+	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Amy) {
+		CheckThingButThenDeleteObject(obj);
+		return;
+	}
+
+	ObjectFunc(origin, Amy_Jiggle_Main_t.Target());
+	origin(obj);
+}
+
+void Amy_Jiggle_Main2_r(ObjectMaster* obj);
+Trampoline Amy_Jiggle_Main2_t(0x485C50, 0x485C57, Amy_Jiggle_Main2_r);
+void Amy_Jiggle_Main2_r(ObjectMaster* obj) {
+	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Amy) {
+		CheckThingButThenDeleteObject(obj);
+		return;
+	}
+
+	ObjectFunc(origin, Amy_Jiggle_Main2_t.Target());
+	origin(obj);
+}
+
+void __cdecl MetalSonic_AfterImage_Display_r(ObjectMaster *obj)
+{
+	EntityData1 *data = obj->Data1;
+	CharObj2 *co2 = GetCharObj2(data->CharIndex);
+	if (co2)
+	{
+		if (IsVisible(&data->Position, 15.0))
+		{
+			BackupConstantAttr();
+			AddConstantAttr(0, NJD_FLAG_USE_ALPHA);
+			njColorBlendingMode(0, NJD_COLOR_BLENDING_SRCALPHA);
+			njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_ONE);
+			float alpha = data->Scale.x - 1.0;
+			SetMaterialAndSpriteColor_Float(alpha, 1.0, 1.0, 1.0);
+			njPushMatrix(0);
+			njTranslateV(0, &data->Position);
+			Angle ang = data->Rotation.z;
+			if (ang)
+			{
+				njRotateZ(0, ang);
+			}
+			ang = data->Rotation.x;
+			if (ang)
+			{
+				njRotateX(0, ang);
+			}
+			ang = data->Rotation.y;
+			if (ang != 0x8000)
+			{
+				njRotateY(0, (-32768 - ang));
+			}
+			Sonic_DrawOtherShit(co2->AnimationThing.Index, co2);
+			njPopMatrix(1u);
+			njColorBlendingMode(0, NJD_COLOR_BLENDING_SRCALPHA);
+			njColorBlendingMode(NJD_DESTINATION_COLOR, NJD_COLOR_BLENDING_INVSRCALPHA);
+			ClampGlobalColorThing_Thing();
+			RestoreConstantAttr();
+		}
+	}
+}
+
+void __cdecl MetalSonic_AfterImage_Main_r(ObjectMaster *obj)
+{
+	EntityData1 *data = obj->Data1;
+
+	MetalSonic_AfterImage_Display_r(obj);
+	data->Scale.x -= 0.1f;
+
+	if (data->Scale.x <= 0.0f)
+	{
+		CheckThingButThenDeleteObject(obj);
+	}
+}
+
+void __cdecl MetalSonic_AfterImages_Main_r(ObjectMaster *obj)
+{
+	EntityData1 *data = obj->Data1;
+
+	if (data->CharIndex == 0) {
+		data->Object = (NJS_OBJECT*)data->Index;
+		obj->MainSub = MetalSonic_AfterImages_Main;
+		MetalSonic_AfterImages_Main(obj);
+		return;
+	}
+
+	if (data->Index-- < 0)
+	{
+		CheckThingButThenDeleteObject(obj);
+	}
+	else
+	{
+		ObjectMaster *character = GetCharacterObject(data->CharIndex);
+		if (character)
+		{
+			CharObj2 *co2 = GetCharObj2(data->CharIndex);
+			if (co2)
+			{
+				ObjectMaster *afterimage = LoadObject(LoadObj_Data1, 4, MetalSonic_AfterImage_Main_r);
+				if (afterimage)
+				{
+					EntityData1 *imgdata = afterimage->Data1;
+					imgdata->CharIndex = data->CharIndex;
+					imgdata->Position = character->Data1->CollisionInfo->CollisionArray->origin;
+					imgdata->Rotation = character->Data1->Rotation;
+					imgdata->Scale.x = 0.5f;
+					afterimage->DisplaySub = MetalSonic_AfterImage_Display_r;
+				}
+			}
+		}
+	}
+}
+
+void __cdecl Sonic_Run1Ani_r(CharObj2 *a1)
+{
+	if (MetalSonicFlag)
+	{
+		if (a1->AnimationThing.Index != 146)
+		{
+			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			if (v1)
+			{
+				v1->Data1->CharIndex = currentplayer;
+				v1->Data1->Index = 5;
+			}
+		}
+		a1->AnimationThing.Index = 146;
+	}
+	else
+	{
+		a1->AnimationThing.Index = 12;
+	}
+}
+
+static void __declspec(naked) Sonic_Run1Ani_()
+{
+	__asm
+	{
+		push esi
+		call Sonic_Run1Ani_r
+		pop esi
+		retn
+	}
+}
+
+void __cdecl Sonic_SpringAni_r(CharObj2 *a1)
+{
+	if (MetalSonicFlag)
+	{
+		if (a1->AnimationThing.Index != 16)
+		{
+			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			if (v1)
+			{
+				v1->Data1->CharIndex = currentplayer;
+				v1->Data1->Index = 20;
+			}
+		}
+		a1->AnimationThing.Index = 16;
+	}
+	else
+	{
+		a1->AnimationThing.Index = 16;
+	}
+}
+
+static void __declspec(naked) Sonic_SpringAni_()
+{
+	__asm
+	{
+		push esi
+		call Sonic_SpringAni_r
+		pop esi
+		retn
+	}
+}
+
+void __cdecl Sonic_Walk3Ani_r(CharObj2 *a1)
+{
+	if (MetalSonicFlag)
+	{
+		if (a1->AnimationThing.Index == 146)
+		{
+			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			if (v1)
+			{
+				v1->Data1->CharIndex = currentplayer;
+				v1->Data1->Index = 5;
+			}
+		}
+	}
+	a1->AnimationThing.Index = 11;
+}
+
+static void __declspec(naked) Sonic_Walk3Ani_()
+{
+	__asm
+	{
+		push esi
+		call Sonic_Walk3Ani_r
+		pop esi
+		retn
+	}
+}
+
+void __cdecl Sonic_Run2Ani_r(CharObj2 *a1)
+{
+	if (MetalSonicFlag)
+	{
+		if (a1->AnimationThing.Index != 13)
+		{
+			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			if (v1)
+			{
+				v1->Data1->CharIndex = currentplayer;
+				v1->Data1->Index = 10;
+			}
+		}
+		a1->AnimationThing.Index = 13;
+	}
+	else
+	{
+		a1->AnimationThing.Index = 13;
+	}
+}
+
+static void __declspec(naked) Sonic_Run2Ani_()
+{
+	__asm
+	{
+		push esi
+		call Sonic_Run2Ani_r
+		pop esi
+		retn
+	}
+}
+
+void __cdecl Sonic_Spin_r(CharObj2 *a1)
+{
+	if (MetalSonicFlag)
+	{
+		if (a1->AnimationThing.Index != 14)
+		{
+			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			if (v1)
+			{
+				v1->Data1->CharIndex = currentplayer;
+				v1->Data1->Index = 10;
+			}
+		}
+		a1->AnimationThing.Index = 14;
+	}
+	else
+	{
+		a1->AnimationThing.Index = 14;
+	}
+}
+
+static void __declspec(naked) Sonic_Spin_()
+{
+	__asm
+	{
+		push esi
+		call Sonic_Spin_r
+		pop esi
+		retn
+	}
+}
+
+void __cdecl Sonic_JumpPadAni_r(CharObj2 *a1)
+{
+	if (MetalSonicFlag)
+	{
+		if (a1->AnimationThing.Index != 73)
+		{
+			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			if (v1)
+			{
+				v1->Data1->CharIndex = currentplayer;
+				v1->Data1->Index = 20;
+			}
+		}
+		a1->AnimationThing.Index = 73;
+	}
+	else
+	{
+		a1->AnimationThing.Index = 73;
+	}
+}
+
+static void __declspec(naked) Sonic_JumpPadAni_()
+{
+	__asm
+	{
+		push esi
+		call Sonic_JumpPadAni_r
+		pop esi
+		retn
+	}
+}
 
 bool redirect = false;
 
@@ -965,6 +1373,14 @@ extern "C"
 			FreeMemory(oldcol);
 			oldcol = nullptr;
 		}
+		if (GameMode == GameModes_Menu) {
+			if (IsTrialCharSel && (CharacterSelection & 0x600)) {
+				MetalSonicFlags[0] = true;
+			}
+			else {
+				MetalSonicFlags[0] = false;
+			}
+		}
 		if (GameMode == GameModes_Menu || CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2 || !GetCharacterObject(0))
 			return;
 		short oldchar[PLAYER_COUNT];
@@ -995,7 +1411,7 @@ extern "C"
 						DeleteObject_(obj);
 				}
 				int sc = selectedcharacter[i];
-				if (sc == Characters_Sonic && MetalSonicFlag)
+				if (sc == Characters_Sonic && MetalSonicFlags[i])
 					sc = Characters_MetalSonic;
 				int textpos = (i * 19 + 1) << 16 | 0xA;
 				SetDebugFontSize((unsigned short)(8 * min(VerticalStretch, HorizontalStretch)));
@@ -1015,14 +1431,6 @@ extern "C"
 			if (selectedcharacter[i] == -1) continue;
 			if (selectedcharacter[i] == oldchar[i])
 			{
-				if (selectedcharacter[i] == Characters_Sonic)
-					if (MetalSonicFlag)
-					{
-						if (btn & Buttons_B)
-							LoadCharTextures(Characters_MetalSonic);
-					}
-					else if (btn & Buttons_Left)
-						UnloadCharTextures(Characters_MetalSonic);
 				continue;
 			}
 			if (GetCharacterObject(i))
@@ -1107,7 +1515,7 @@ extern "C"
 			switch (selectedcharacter[0])
 			{
 			default:
-				if (MetalSonicFlag)
+				if (MetalSonicFlags[0])
 					LoadSoundList(62);
 				else
 					LoadSoundList(1);
@@ -1162,7 +1570,7 @@ extern "C"
 			switch (selectedcharacter[0])
 			{
 			default:
-				if (MetalSonicFlag)
+				if (MetalSonicFlags[0])
 					LoadSoundList(62);
 				else
 					LoadSoundList(1);
@@ -1289,6 +1697,16 @@ extern "C"
 		WriteCall((void*)0x4E966C, GetCharacter0ID); // fix ice cap snowboard 1
 		WriteCall((void*)0x4E9686, GetCharacter0ID); // fix ice cap snowboard 2
 		WriteCall((void*)0x597B1C, GetCharacter0ID); // fix sand hill snowboard
+		WriteCall((void*)0x4949ED, SwapSonicTextures); // use the correct texture for Sonic / Metal Sonic 
+
+		//Metal Sonic AfterImages for every player
+		WriteJump((void*)Sonic_Run1AniPtr, Sonic_Run1Ani_);
+		WriteJump((void*)Sonic_SpringAniPtr, Sonic_SpringAni_);
+		WriteJump((void*)Sonic_Walk3AniPtr, Sonic_Walk3Ani_);
+		WriteJump((void*)Sonic_Run2AniPtr, Sonic_Run2Ani_);
+		WriteJump((void*)Sonic_SpinPtr, Sonic_Spin_);
+		WriteJump((void*)Sonic_JumpPadAniPtr, Sonic_JumpPadAni_);
+
 		const IniFile *settings = new IniFile(std::string(path) + "\\config.ini");
 		for (int i = 0; i < Characters_MetalSonic; i++)
 			defaultcharacters[i] = ParseCharacterID(settings->getString("Player1", charnames[i]), (Characters)i);
