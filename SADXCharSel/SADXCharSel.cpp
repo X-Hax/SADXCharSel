@@ -560,7 +560,7 @@ void __cdecl LoadLevelResults_r()
 		a2.y = 5.7132001f;
 		a2.z = -1.5176001f;
 		sub_43EC90(EntityData1Ptrs[0], &a2);
-		a1 = EntityData1Ptrs[0]->CollisionInfo->CollisionArray->origin;
+		a1 = EntityData1Ptrs[0]->CollisionInfo->CollisionArray->center;
 		stru_3B2C6DC = a1;
 		njSubVector(&a1, &a2);
 		stru_3B2C6D0 = a1;
@@ -1115,7 +1115,7 @@ void __cdecl MetalSonic_AfterImages_Main_r(ObjectMaster *obj)
 				{
 					EntityData1 *imgdata = afterimage->Data1;
 					imgdata->CharIndex = data->CharIndex;
-					imgdata->Position = character->Data1->CollisionInfo->CollisionArray->origin;
+					imgdata->Position = character->Data1->CollisionInfo->CollisionArray->center;
 					imgdata->Rotation = character->Data1->Rotation;
 					imgdata->Scale.x = 0.5f;
 					afterimage->DisplaySub = MetalSonic_AfterImage_Display_r;
@@ -1362,7 +1362,7 @@ extern "C"
 	{
 		if (!IsGamePaused() && oldcol)
 		{
-			if (HIBYTE(oldcol->Flags) & 0x80)
+			if (HIBYTE(oldcol->flag) & 0x80)
 			{
 				if (oldcol->CollisionArray)
 				{
