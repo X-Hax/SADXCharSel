@@ -16,3 +16,5 @@
 // TODO: reference additional headers your program requires here
 
 const unsigned char PLAYER_COUNT = 4;
+#include "SADXModLoader.h"
+#include "Trampoline.h"

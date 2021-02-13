@@ -15,3 +15,4 @@ public:
 
 void InitIndicator();
 void InitSprites();
+void __cdecl E100_Series_Fixes_Init();

@@ -1632,6 +1632,7 @@ extern "C"
 		WriteData((Uint8*)0x004418B8, PLAYER_COUNT); // IsPlayerInsideSphere (could probably use a better name!)
 
 		InitSprites();
+		E100_Series_Fixes_Init();
 
 		WriteCall((void*)0x41522C, SetSelectedCharacter);
 		WriteJump(LoadCharacter, LoadCharacter_r);
