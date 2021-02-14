@@ -988,7 +988,7 @@ void Sonic_Main_r(ObjectMaster* obj) {
 void Tails_Jiggle_Main_r(ObjectMaster* obj);
 Trampoline Tails_Jiggle_Main_t(0x45B840, 0x45B847, Tails_Jiggle_Main_r);
 void Tails_Jiggle_Main_r(ObjectMaster* obj) {
-	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Tails) {
+	if (!EntityData1Ptrs[obj->Data1->CharIndex] || EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Tails) {
 		CheckThingButThenDeleteObject(obj);
 		return;
 	}
@@ -1000,7 +1000,7 @@ void Tails_Jiggle_Main_r(ObjectMaster* obj) {
 void Knuckles_Jiggle_Main_r(ObjectMaster* obj);
 Trampoline Knuckles_Jiggle_Main_t(0x473CE0, 0x473CE7, Knuckles_Jiggle_Main_r);
 void Knuckles_Jiggle_Main_r(ObjectMaster* obj) {
-	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Knuckles) {
+	if (!EntityData1Ptrs[obj->Data1->CharIndex] || EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Knuckles) {
 		CheckThingButThenDeleteObject(obj);
 		return;
 	}
@@ -1012,7 +1012,7 @@ void Knuckles_Jiggle_Main_r(ObjectMaster* obj) {
 void Amy_Jiggle_Main_r(ObjectMaster* obj);
 Trampoline Amy_Jiggle_Main_t(0x485F40, 0x485F47, Amy_Jiggle_Main_r);
 void Amy_Jiggle_Main_r(ObjectMaster* obj) {
-	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Amy) {
+	if (!EntityData1Ptrs[obj->Data1->CharIndex] || EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Amy) {
 		CheckThingButThenDeleteObject(obj);
 		return;
 	}
@@ -1024,7 +1024,7 @@ void Amy_Jiggle_Main_r(ObjectMaster* obj) {
 void Amy_Jiggle_Main2_r(ObjectMaster* obj);
 Trampoline Amy_Jiggle_Main2_t(0x485C50, 0x485C57, Amy_Jiggle_Main2_r);
 void Amy_Jiggle_Main2_r(ObjectMaster* obj) {
-	if (EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Amy) {
+	if (!EntityData1Ptrs[obj->Data1->CharIndex] || EntityData1Ptrs[obj->Data1->CharIndex]->CharID != Characters_Amy) {
 		CheckThingButThenDeleteObject(obj);
 		return;
 	}
