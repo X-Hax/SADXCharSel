@@ -7,6 +7,7 @@ Trampoline* sub_580A90_t;
 
 Trampoline* Chaos0_t;
 Trampoline* Chaos2_t;
+Trampoline* EggHornet_t;
 
 
 //Delete gamma shot on target
@@ -130,18 +131,32 @@ void Chaos0_Main_R(ObjectMaster* obj) {
 
 void __cdecl Chaos_Init()
 {
-
 	Chaos0_t = new Trampoline((int)Chaos0_Main, (int)Chaos0_Main + 0x7, Chaos0_Main_R);
 	Chaos2_t = new Trampoline((int)Chaos2_Main, (int)Chaos2_Main + 0x6, Chaos2_Main_R);
 }
 
 
+void EggHornet_Main_R(ObjectMaster* obj) {
+
+	EntityData1* data1 = obj->Data1;
+	Check_AllocateObjectData2(obj, data1);
+
+	ObjectFunc(origin, EggHornet_t->Target());
+	origin(obj);
+}
+
+
 extern __int16 selectedcharacter[PLAYER_COUNT];
+
+
 
 void Init_GammaFixes() {
 
 	EggViper_GammaFixes();
 	Chaos_Init();
+
+	EggHornet_t = new Trampoline((int)EggHornet_Main, (int)EggHornet_Main + 0x7, EggHornet_Main_R);
+
 
 	WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
 	WriteCall((void*)0x427F2B, GetCharacter0ID); // fix ResetTime2() for Gamma
