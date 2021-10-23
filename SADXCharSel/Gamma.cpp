@@ -4,10 +4,12 @@ Trampoline* EggViper_t;
 Trampoline* sub_580E70_t;
 Trampoline* Egm3Sippo_t;
 Trampoline* sub_580A90_t;
+
 Trampoline* Chaos0_t;
 Trampoline* Chaos2_t;
 
 
+//Delete gamma shot on target
 void Remove_Cursor(ObjectMaster* obj) {
 
 	EntityData1* data = obj->Data1;
@@ -19,6 +21,32 @@ void Remove_Cursor(ObjectMaster* obj) {
 	}
 }
 
+//Allow gamma to target object
+void Check_AllocateObjectData2(ObjectMaster* obj, EntityData1* data1)
+{
+	if (!obj || !data1)
+		return;
+
+	//if one of the player is gamma, init the target thing
+	for (int i = 0; i < 8; i++) {
+
+		if (!EntityData1Ptrs[i])
+			continue;
+
+		if (EntityData1Ptrs[i]->CharID == Characters_Gamma)
+		{
+			if (!data1->Action)
+			{
+				AllocateObjectData2(obj, data1);
+				ObjectData2_SetStartPosition(obj->Data1, (ObjectData2*)obj->Data2);
+			}
+
+			Remove_Cursor(obj);
+		}
+	}
+}
+
+//Viper stuff
 void sub_580A90_r(ObjectMaster* obj) {
 
 	Remove_Cursor(obj);
@@ -80,13 +108,40 @@ void EggViper_GammaFixes() {
 }
 
 
+void Chaos2_Main_R(ObjectMaster* obj) {
+
+	EntityData1* data1 = obj->Data1;
+
+	Check_AllocateObjectData2(obj, data1);
+
+	ObjectFunc(origin, Chaos2_t->Target());
+	origin(obj);
+}
+
+void Chaos0_Main_R(ObjectMaster* obj) {
+
+	EntityData1* data1 = obj->Data1;
+	Check_AllocateObjectData2(obj, data1);
+
+	ObjectFunc(origin, Chaos0_t->Target());
+	origin(obj);
+}
+
+
+void __cdecl Chaos_Init()
+{
+
+	Chaos0_t = new Trampoline((int)Chaos0_Main, (int)Chaos0_Main + 0x7, Chaos0_Main_R);
+	Chaos2_t = new Trampoline((int)Chaos2_Main, (int)Chaos2_Main + 0x6, Chaos2_Main_R);
+}
+
 
 extern __int16 selectedcharacter[PLAYER_COUNT];
 
 void Init_GammaFixes() {
 
 	EggViper_GammaFixes();
-
+	Chaos_Init();
 
 	WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
 	WriteCall((void*)0x427F2B, GetCharacter0ID); // fix ResetTime2() for Gamma

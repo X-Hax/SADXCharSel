@@ -11,6 +11,7 @@ ObjectFunc(E102KillCursor, 0x4CEFE0);
 ObjectFunc(sub_580E70, 0x580E70);
 ObjectFunc(EGM3Sippo, 0x583FB0);
 ObjectFunc(sub_580A90, 0x580A90);
+ObjectFunc(SBombChaos6, 0x55C3A0);
 
 // void __usercall(CharObj2 *a2@<edi>, EntityData1 *a3@<esi>)
 const void* const sub_7B4450Ptr = (void*)0x7B4450;
