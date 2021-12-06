@@ -5,11 +5,6 @@ Trampoline* MK2Main_t;
 Trampoline* E103_Main_t;
 Trampoline* E104_Main_t;
 
-ObjectFunc(E101_Main, 0x567fd0);
-ObjectFunc(E103_Main, 0x4e7e90);
-ObjectFunc(E104_Main, 0x605A90);
-ObjectFunc(MK2_Main, 0x56C0B0);
-DataPointer(char, BossHP, 0x3c58148);
 
 //Allow non gamma character to damage E100 Series.
 void CheckAndSetDamage(EntityData1* data1, EntityData1* p1)

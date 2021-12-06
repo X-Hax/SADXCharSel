@@ -2,15 +2,15 @@
 //
 
 #include "stdafx.h"
-#include "SADXModLoader.h"
 #include "IniFile.hpp"
 #include "Indicator.h"
-#include "Trampoline.h"
+
 #include <algorithm>
 using std::string;
 using std::unordered_map;
 using std::vector;
 using std::transform;
+HelperFunctions help;
 
 const int loc_414914 = 0x414914;
 __declspec(naked) void ChangeStartPosCharLoading()
@@ -95,7 +95,7 @@ void ChooseSelectedCharacter(int i)
 	}
 }
 
-FunctionPointer(void, sub_404A60, (int), 0x404A60);
+
 void __cdecl SetSelectedCharacter(int arg)
 {
 	if (selectedcharacter[0] == -1)
@@ -104,21 +104,10 @@ void __cdecl SetSelectedCharacter(int arg)
 	sub_404A60(arg);
 }
 
-// void __usercall(CharObj2 *a2@<edi>, EntityData1 *a3@<esi>)
-const void *const sub_7B4450Ptr = (void *)0x7B4450;
-inline void sub_7B4450(CharObj2 *a2, EntityData1 *a3)
-{
-	__asm
-	{
-		mov edi, [a2]
-		mov esi, [a3]
-		call sub_7B4450Ptr
-	}
-}
 
-void __cdecl Eggman_Display(ObjectMaster *obj)
+void __cdecl Eggman_Display(ObjectMaster* obj)
 {
-	sub_7B4450(((EntityData2 *)obj->Data2)->CharacterData, obj->Data1);
+	sub_7B4450(((EntityData2*)obj->Data2)->CharacterData, obj->Data1);
 }
 
 ObjectFuncPtr charfuncs[] = {
@@ -132,15 +121,15 @@ ObjectFuncPtr charfuncs[] = {
 	Big_Main
 };
 
-ObjectMaster *LoadCharObj(int i)
+ObjectMaster* LoadCharObj(int i)
 {
-	ObjectMaster *obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter[i]]);
+	ObjectMaster* obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[selectedcharacter[i]]);
 	obj->Data1->CharID = (char)selectedcharacter[i];
 	if (selectedcharacter[i] == Characters_Eggman)
 		obj->DisplaySub = Eggman_Display;
 	obj->Data1->CharIndex = (char)i;
 	EntityData1Ptrs[i] = obj->Data1;
-	EntityData2Ptrs[i] = (EntityData2 *)obj->Data2;
+	EntityData2Ptrs[i] = (EntityData2*)obj->Data2;
 	return obj;
 }
 
@@ -154,8 +143,7 @@ int tailsracelevels[] = {
 
 bool isracelevel = false;
 
-DataPointer(char, byte_3B2A2F1, 0x3B2A2F1);
-ObjectMaster *LoadTailsOpponent_r()
+ObjectMaster* LoadTailsOpponent_r()
 {
 	RaceWinnerPlayer = 0;
 	FastSonicAI = IsFastSonicAI();
@@ -184,21 +172,20 @@ ObjectMaster *LoadTailsOpponent_r()
 		if (selectedcharacter[1] == -1)
 			selectedcharacter[1] = raceaicharacter;
 		LoadObject((LoadObj)(LoadObj_UnknownB | LoadObj_Data1), 0, Sonic2PAI_Load);
-		ObjectMaster *v3 = LoadCharObj(1);
+		ObjectMaster* v3 = LoadCharObj(1);
 		v3->Data1->Unknown = 2;
 		DisableController(1u);
 		return v3;
 	}
 }
 
-DataPointer(int, dword_3B2A304, 0x3B2A304);
-ObjectMaster *Load2PTails_r(ObjectMaster *player1)
+ObjectMaster* Load2PTails_r(ObjectMaster* player1)
 {
 	if (!TailsAI_ptr
 		&& (((CurrentAct | (unsigned __int16)(CurrentLevel << 8)) & 0xFF00) == LevelAndActIDs_Casinopolis1
 			|| CheckTailsAI()))
 	{
-		ObjectMaster *v1 = LoadObject(LoadObj_Data1, 0, TailsAI_Main);
+		ObjectMaster* v1 = LoadObject(LoadObj_Data1, 0, TailsAI_Main);
 		TailsAI_ptr = v1;
 		if (v1)
 		{
@@ -207,7 +194,7 @@ ObjectMaster *Load2PTails_r(ObjectMaster *player1)
 			v1->Data1->CharID = (char)selectedcharacter[1];
 			v1->Data1->CharIndex = 1;
 			v1->DeleteSub = TailsAI_Delete;
-			ObjectMaster *v3 = LoadCharObj(1);
+			ObjectMaster* v3 = LoadCharObj(1);
 			v3->Data1->Position.x = player1->Data1->Position.x - njCos(player1->Data1->Rotation.y) * 10;
 			v3->Data1->Position.y = player1->Data1->Position.y;
 			v3->Data1->Position.z = player1->Data1->Position.z - njSin(player1->Data1->Rotation.y) * 10;
@@ -219,28 +206,27 @@ ObjectMaster *Load2PTails_r(ObjectMaster *player1)
 	return nullptr;
 }
 
-FunctionPointer(int, sub_42FB00, (), 0x42FB00);
-FunctionPointer(ObjectMaster *, CheckLoadBird, (), 0x4C6820);
+
 void LoadCharacter_r()
 {
 	isracelevel = false;
 	ClearPlayerArrays();
-	ObjectMaster *obj;
+	ObjectMaster* obj;
 	if (CurrentLevel == LevelIDs_SkyChase1 || CurrentLevel == LevelIDs_SkyChase2)
 	{
 		obj = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, Tornado_Main);
 		obj->Data1->CharID = (char)CurrentCharacter;
 		obj->Data1->CharIndex = 0;
 		EntityData1Ptrs[0] = obj->Data1;
-		EntityData2Ptrs[0] = (EntityData2 *)obj->Data2;
+		EntityData2Ptrs[0] = (EntityData2*)obj->Data2;
 		MovePlayerToStartPoint(obj->Data1);
 	}
 	else
 	{
 		obj = LoadCharObj(0);
 		MovePlayerToStartPoint(obj->Data1);
-		ObjectMaster *lastobj = obj;
-		ObjectMaster *o2 = nullptr;
+		ObjectMaster* lastobj = obj;
+		ObjectMaster* o2 = nullptr;
 		if (!CurrentCharacter && GameMode != GameModes_Mission && !MetalSonicFlags[0])
 			o2 = Load2PTails_r(obj);
 		switch (CurrentCharacter)
@@ -297,12 +283,7 @@ void ResetSelectedCharacter()
 	original();
 }
 
-int GetCharacter0ID()
-{
-	return GetCharacterID(0);
-}
 
-FunctionPointer(void, sub_469300, (int *, char, int), 0x469300);
 void SetResultsCamera()
 {
 	switch (GetCharacter0ID())
@@ -372,12 +353,10 @@ void __cdecl PlayStandardResultsVoice()
 	}
 }
 
-ObjectFunc(sub_47D300, 0x47D300);
-FunctionPointer(int, sub_46A820, (), 0x46A820);
-FunctionPointer(int, sub_46A7F0, (), 0x46A7F0);
+
 void __cdecl sub_461560()
 {
-	CharObj2 *v3; // eax@20
+	CharObj2* v3; // eax@20
 
 	switch (CurrentLevel)
 	{
@@ -430,10 +409,10 @@ void __cdecl sub_461560()
 	}
 }
 
-VoidFunc(sub_457D00, 0x457D00);
-void __cdecl sub_4141F0(ObjectMaster *obj)
+
+void __cdecl sub_4141F0(ObjectMaster* obj)
 {
-	EntityData1 *v1 = GetCharacterObject(0)->Data1;
+	EntityData1* v1 = GetCharacterObject(0)->Data1;
 	if (EntityData1Ptrs[1] && sub_46A820() && sub_46A7F0() == 1)
 		v1 = EntityData1Ptrs[1];
 	if (v1->Status & 3)
@@ -486,12 +465,6 @@ void __cdecl sub_4141F0(ObjectMaster *obj)
 	}
 }
 
-DataPointer(NJS_VECTOR, stru_3B2C6DC, 0x3B2C6DC);
-DataPointer(NJS_VECTOR, stru_3B2C6D0, 0x3B2C6D0);
-VoidFunc(sub_5919E0, 0x5919E0);
-FunctionPointer(void, sub_43EC90, (EntityData1 *, NJS_VECTOR *), 0x43EC90);
-FunctionPointer(void, sub_437D20, (void(__cdecl *a1)(int), char a2, char a3), 0x437D20);
-FunctionPointer(void, sub_464B00, (int), 0x464B00);
 void __cdecl LoadLevelResults_r()
 {
 	NJS_VECTOR a1; // [sp+0h] [bp-18h]@12
@@ -708,7 +681,7 @@ int SetAmyWinPose()
 		return 32;
 }
 
-void __cdecl CheckLoadCapsule(ObjectMaster *obj)
+void __cdecl CheckLoadCapsule(ObjectMaster* obj)
 {
 	if (GetCharacter0ID() == Characters_Big)
 	{
@@ -720,7 +693,7 @@ void __cdecl CheckLoadCapsule(ObjectMaster *obj)
 		Capsule_Load(obj);
 }
 
-void __cdecl CheckLoadFroggy(ObjectMaster *obj)
+void __cdecl CheckLoadFroggy(ObjectMaster* obj)
 {
 	if (GetCharacter0ID() != Characters_Big)
 	{
@@ -734,9 +707,9 @@ void __cdecl CheckLoadFroggy(ObjectMaster *obj)
 	}
 }
 
-void __cdecl OFrog_CheckTouch_i(ObjectMaster *obj)
+void __cdecl OFrog_CheckTouch_i(ObjectMaster* obj)
 {
-	EntityData1 *v1 = obj->Data1;
+	EntityData1* v1 = obj->Data1;
 	int v2 = IsPlayerInsideSphere(&v1->Position, (v1->Scale.x + 1.0f) * 14.0f);
 	if (v2 == 1)
 	{
@@ -772,7 +745,7 @@ void ReplaceSETObject(ObjectFuncPtr find, ObjectFuncPtr replace)
 					ObjLists[i]->List[j].LoadSub = replace;
 }
 
-static string trim(const string &s)
+static string trim(const string& s)
 {
 	auto st = s.find_first_not_of(' ');
 	if (st == string::npos)
@@ -795,7 +768,7 @@ static const unordered_map<string, uint8_t> charnamemap = {
 	{ "eggmanai", Characters_MetalSonic }
 };
 
-static uint8_t ParseCharacterID(const string &str, Characters def)
+static uint8_t ParseCharacterID(const string& str, Characters def)
 {
 	string s = trim(str);
 	transform(s.begin(), s.end(), s.begin(), ::tolower);
@@ -805,7 +778,7 @@ static uint8_t ParseCharacterID(const string &str, Characters def)
 	return def;
 }
 
-const char *buttonstrings[] = {
+const char* buttonstrings[] = {
 	"Left:  Sonic",
 	"X:     Eggman",
 	"R:     Tails",
@@ -818,10 +791,9 @@ const char *buttonstrings[] = {
 	"Start: Quit"
 };
 
-CollisionInfo *oldcol = nullptr;
+CollisionInfo* oldcol = nullptr;
 
-FunctionPointer(void, sub_43FA90, (EntityData1 *a1, CharObj2 **a2, CharObj2 *a3), 0x43FA90);
-void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
+void __cdecl CheckDeleteAnimThing(EntityData1* a1, CharObj2** a2, CharObj2* a3)
 {
 	for (int i = 0; i < 8; i++)
 		if (EntityData1Ptrs[i] && EntityData1Ptrs[i] != a1 && EntityData1Ptrs[i]->CharID == a1->CharID)
@@ -829,8 +801,7 @@ void __cdecl CheckDeleteAnimThing(EntityData1 *a1, CharObj2 **a2, CharObj2 *a3)
 	sub_43FA90(a1, a2, a3);
 }
 
-DataPointer(NJS_TEXANIM, stru_91BB6C, 0x91BB6C);
-void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
+void __cdecl SetBigLifeTex(NJS_SPRITE* _sp, Int n, Float pri, NJD_SPRITE attr)
 {
 	if (MetalSonicFlags[0])
 		stru_91BB6C.texid = 24;
@@ -839,8 +810,7 @@ void __cdecl SetBigLifeTex(NJS_SPRITE *_sp, Int n, Float pri, NJD_SPRITE attr)
 	njDrawSprite2D_ForcePriority(_sp, n, pri, attr);
 }
 
-FunctionPointer(int, sub_4751B0, (EntityData1 *), 0x4751B0);
-int __cdecl CheckKnucklesBoundaryThing(EntityData1 *data)
+int __cdecl CheckKnucklesBoundaryThing(EntityData1* data)
 {
 	return CurrentCharacter == Characters_Knuckles && sub_4751B0(data);
 }
@@ -884,14 +854,14 @@ __declspec(naked) void SetKnucklesWinPose()
 }
 
 
-void __cdecl LoadCharBoss_r(CharBossData *a1)
+void __cdecl LoadCharBoss_r(CharBossData* a1)
 {
 	if (a1)
 	{
 		if (a1->BossID < 6)
 		{
 			short c = bosscharacters[a1->BossID / 2];
-			ObjectMaster *v1 = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[c]);
+			ObjectMaster* v1 = LoadObject((LoadObj)(LoadObj_UnknownA | LoadObj_Data1 | LoadObj_Data2), 1, charfuncs[c]);
 			v1->Data1->CharID = (char)c;
 			v1->Data1->CharIndex = 1;
 			a1->BossCharacter = v1;
@@ -903,14 +873,14 @@ void __cdecl LoadCharBoss_r(CharBossData *a1)
 
 int bossids[] = { 0, 0, 0, 2, 0, 0, 4, 0 };
 decltype(LoadSonicBossAI) bossaifuncs[] = { LoadSonicBossAI, LoadKnucklesBossAI, LoadGammaBossAI };
-ObjectMaster *__cdecl LoadCharBossAI_r(CharBossData *a1)
+ObjectMaster* __cdecl LoadCharBossAI_r(CharBossData* a1)
 {
 	CharacterBossActive = 1;
 	a1->anonymous_3 = 0;
 	if (a1->BossID < 6)
 	{
 		a1->BossID = bossids[bossai[a1->BossID / 2]] | (a1->BossID & 1);
-		ObjectMaster *v1 = bossaifuncs[a1->BossID / 2](a1);
+		ObjectMaster* v1 = bossaifuncs[a1->BossID / 2](a1);
 		SetupCharBossArena(v1);
 		return v1;
 	}
@@ -934,10 +904,10 @@ void Teleport(uint8_t to, uint8_t from)
 
 const string charnames[8] = { "Sonic", "Eggman", "Tails", "Knuckles", "Tikal", "Amy", "Gamma", "Big" };
 
-DataPointer(char, IsTrialCharSel, 0x3B2A2FA);
 
 void SwapSonicTextures(NJS_TEXLIST* sonictex) {
-	if (GameMode == GameModes_Menu) return;
+	if (GameMode == GameModes_Menu)
+		return;
 
 	if (MetalSonicFlag == 1) {
 		njSetTexture(&METALSONIC_TEXLIST);
@@ -960,7 +930,7 @@ inline void SetMetalSonicFlag(uint8_t id) {
 
 void Sonic_Display_r(ObjectMaster* obj);
 Trampoline Sonic_Display_t(0x4948C0, 0x4948C7, Sonic_Display_r);
-void __cdecl Sonic_Display_r(ObjectMaster *obj)
+void __cdecl Sonic_Display_r(ObjectMaster* obj)
 {
 	if (GameState == 16) {
 		// do the swap when the game is paused, since the main function is discarded
@@ -1033,10 +1003,10 @@ void Amy_Jiggle_Main2_r(ObjectMaster* obj) {
 	origin(obj);
 }
 
-void __cdecl MetalSonic_AfterImage_Display_r(ObjectMaster *obj)
+void __cdecl MetalSonic_AfterImage_Display_r(ObjectMaster* obj)
 {
-	EntityData1 *data = obj->Data1;
-	CharObj2 *co2 = GetCharObj2(data->CharIndex);
+	EntityData1* data = obj->Data1;
+	CharObj2* co2 = GetCharObj2(data->CharIndex);
 	if (co2)
 	{
 		if (IsVisible(&data->Position, 15.0))
@@ -1074,9 +1044,9 @@ void __cdecl MetalSonic_AfterImage_Display_r(ObjectMaster *obj)
 	}
 }
 
-void __cdecl MetalSonic_AfterImage_Main_r(ObjectMaster *obj)
+void __cdecl MetalSonic_AfterImage_Main_r(ObjectMaster* obj)
 {
-	EntityData1 *data = obj->Data1;
+	EntityData1* data = obj->Data1;
 
 	MetalSonic_AfterImage_Display_r(obj);
 	data->Scale.x -= 0.1f;
@@ -1087,9 +1057,9 @@ void __cdecl MetalSonic_AfterImage_Main_r(ObjectMaster *obj)
 	}
 }
 
-void __cdecl MetalSonic_AfterImages_Main_r(ObjectMaster *obj)
+void __cdecl MetalSonic_AfterImages_Main_r(ObjectMaster* obj)
 {
-	EntityData1 *data = obj->Data1;
+	EntityData1* data = obj->Data1;
 
 	if (data->CharIndex == 0) {
 		data->Object = (NJS_OBJECT*)data->Index;
@@ -1104,16 +1074,16 @@ void __cdecl MetalSonic_AfterImages_Main_r(ObjectMaster *obj)
 	}
 	else
 	{
-		ObjectMaster *character = GetCharacterObject(data->CharIndex);
+		ObjectMaster* character = GetCharacterObject(data->CharIndex);
 		if (character)
 		{
-			CharObj2 *co2 = GetCharObj2(data->CharIndex);
+			CharObj2* co2 = GetCharObj2(data->CharIndex);
 			if (co2)
 			{
-				ObjectMaster *afterimage = LoadObject(LoadObj_Data1, 4, MetalSonic_AfterImage_Main_r);
+				ObjectMaster* afterimage = LoadObject(LoadObj_Data1, 4, MetalSonic_AfterImage_Main_r);
 				if (afterimage)
 				{
-					EntityData1 *imgdata = afterimage->Data1;
+					EntityData1* imgdata = afterimage->Data1;
 					imgdata->CharIndex = data->CharIndex;
 					imgdata->Position = character->Data1->CollisionInfo->CollisionArray->center;
 					imgdata->Rotation = character->Data1->Rotation;
@@ -1125,13 +1095,13 @@ void __cdecl MetalSonic_AfterImages_Main_r(ObjectMaster *obj)
 	}
 }
 
-void __cdecl Sonic_Run1Ani_r(CharObj2 *a1)
+void __cdecl Sonic_Run1Ani_r(CharObj2* a1)
 {
 	if (MetalSonicFlag)
 	{
 		if (a1->AnimationThing.Index != 146)
 		{
-			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			ObjectMaster* v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
 			if (v1)
 			{
 				v1->Data1->CharIndex = currentplayer;
@@ -1157,13 +1127,13 @@ static void __declspec(naked) Sonic_Run1Ani_()
 	}
 }
 
-void __cdecl Sonic_SpringAni_r(CharObj2 *a1)
+void __cdecl Sonic_SpringAni_r(CharObj2* a1)
 {
 	if (MetalSonicFlag)
 	{
 		if (a1->AnimationThing.Index != 16)
 		{
-			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			ObjectMaster* v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
 			if (v1)
 			{
 				v1->Data1->CharIndex = currentplayer;
@@ -1189,13 +1159,13 @@ static void __declspec(naked) Sonic_SpringAni_()
 	}
 }
 
-void __cdecl Sonic_Walk3Ani_r(CharObj2 *a1)
+void __cdecl Sonic_Walk3Ani_r(CharObj2* a1)
 {
 	if (MetalSonicFlag)
 	{
 		if (a1->AnimationThing.Index == 146)
 		{
-			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			ObjectMaster* v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
 			if (v1)
 			{
 				v1->Data1->CharIndex = currentplayer;
@@ -1217,13 +1187,13 @@ static void __declspec(naked) Sonic_Walk3Ani_()
 	}
 }
 
-void __cdecl Sonic_Run2Ani_r(CharObj2 *a1)
+void __cdecl Sonic_Run2Ani_r(CharObj2* a1)
 {
 	if (MetalSonicFlag)
 	{
 		if (a1->AnimationThing.Index != 13)
 		{
-			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			ObjectMaster* v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
 			if (v1)
 			{
 				v1->Data1->CharIndex = currentplayer;
@@ -1249,13 +1219,13 @@ static void __declspec(naked) Sonic_Run2Ani_()
 	}
 }
 
-void __cdecl Sonic_Spin_r(CharObj2 *a1)
+void __cdecl Sonic_Spin_r(CharObj2* a1)
 {
 	if (MetalSonicFlag)
 	{
 		if (a1->AnimationThing.Index != 14)
 		{
-			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			ObjectMaster* v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
 			if (v1)
 			{
 				v1->Data1->CharIndex = currentplayer;
@@ -1281,13 +1251,13 @@ static void __declspec(naked) Sonic_Spin_()
 	}
 }
 
-void __cdecl Sonic_JumpPadAni_r(CharObj2 *a1)
+void __cdecl Sonic_JumpPadAni_r(CharObj2* a1)
 {
 	if (MetalSonicFlag)
 	{
 		if (a1->AnimationThing.Index != 73)
 		{
-			ObjectMaster *v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
+			ObjectMaster* v1 = LoadObject(LoadObj_Data1, 3, MetalSonic_AfterImages_Main_r);
 			if (v1)
 			{
 				v1->Data1->CharIndex = currentplayer;
@@ -1314,6 +1284,7 @@ static void __declspec(naked) Sonic_JumpPadAni_()
 }
 
 bool redirect = false;
+
 
 extern "C"
 {
@@ -1360,6 +1331,7 @@ extern "C"
 
 	__declspec(dllexport) void __cdecl OnFrame()
 	{
+
 		if (!IsGamePaused() && oldcol)
 		{
 			if (HIBYTE(oldcol->flag) & 0x80)
@@ -1406,7 +1378,7 @@ extern "C"
 				if (startenabled && btn & Buttons_Start)
 				{
 					selectedcharacter[i] = -1;
-					ObjectMaster *obj = GetCharacterObject(i);
+					ObjectMaster* obj = GetCharacterObject(i);
 					if (obj)
 						DeleteObject_(obj);
 				}
@@ -1423,7 +1395,7 @@ extern "C"
 						SetDebugFontColor(0xFF00FF00);
 					else
 						SetDebugFontColor(0xFFBFBFBF);
-					DisplayDebugString(textpos++, (char *)buttonstrings[j]);
+					DisplayDebugString(textpos++, (char*)buttonstrings[j]);
 				}
 				SetDebugFontColor(0xFFBFBFBF);
 				SetDebugFontSize(8);
@@ -1435,14 +1407,14 @@ extern "C"
 			}
 			if (GetCharacterObject(i))
 			{
-				ObjectMaster *obj = GetCharacterObject(i);
-				CharObj2 *obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
+				ObjectMaster* obj = GetCharacterObject(i);
+				CharObj2* obj2 = ((EntityData2*)obj->Data2)->CharacterData;
 				short powerups = obj2->Powerups;
 				short jumptime = obj2->JumpTime;
 				short underwatertime = obj2->UnderwaterTime;
 				float loopdist = obj2->LoopDist;
 				NJS_VECTOR speed = obj2->Speed;
-				ObjectMaster *heldobj = obj2->ObjectHeld;
+				ObjectMaster* heldobj = obj2->ObjectHeld;
 				obj->DeleteSub(obj);
 				obj->MainSub = charfuncs[selectedcharacter[i]];
 				if (selectedcharacter[i] == Characters_Eggman)
@@ -1458,7 +1430,7 @@ extern "C"
 				else
 					Collision_Free(obj);
 				obj->MainSub(obj);
-				obj2 = ((EntityData2 *)obj->Data2)->CharacterData;
+				obj2 = ((EntityData2*)obj->Data2)->CharacterData;
 				obj2->Powerups = powerups;
 				obj2->JumpTime = jumptime;
 				obj2->UnderwaterTime = underwatertime;
@@ -1468,8 +1440,8 @@ extern "C"
 			}
 			else
 			{
-				ObjectMaster *obj = LoadCharObj(i);
-				ObjectMaster *p1 = GetCharacterObject(0);
+				ObjectMaster* obj = LoadCharObj(i);
+				ObjectMaster* p1 = GetCharacterObject(0);
 				obj->Data1->Position.x = p1->Data1->Position.x - njCos(p1->Data1->Rotation.y) * 10;
 				obj->Data1->Position.y = p1->Data1->Position.y;
 				obj->Data1->Position.z = p1->Data1->Position.z - njSin(p1->Data1->Rotation.y) * 10;
@@ -1619,8 +1591,12 @@ extern "C"
 		}
 	}
 
-	__declspec(dllexport) void __cdecl Init(const char *path, const HelperFunctions &helperFunctions)
+
+	__declspec(dllexport) void __cdecl Init(const char* path, const HelperFunctions& helperFunctions)
 	{
+
+		help = helperFunctions;
+
 		// Enables WriteAnalogs for controllers >= 2 (3)
 		Uint8 patch[3] = { 0x83u, 0xFFu, 0x04u };
 		WriteData((void*)0x0040F180, patch);
@@ -1633,6 +1609,7 @@ extern "C"
 
 		InitSprites();
 		E100_Series_Fixes_Init();
+		Init_GammaFixes();
 
 		WriteCall((void*)0x41522C, SetSelectedCharacter);
 		WriteJump(LoadCharacter, LoadCharacter_r);
@@ -1640,20 +1617,15 @@ extern "C"
 		WriteJump((void*)0x4B71A0, LoadCharBossAI_r);
 		WriteJump((void*)0x41490D, ChangeStartPosCharLoading);
 		WriteJump((void*)0x490C6B, (void*)0x490C80); // prevent Big from automatically loading Big's HUD
-		WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
-		WriteCall((void*)0x427F2B, GetCharacter0ID); // fix ResetTime2() for Gamma
-		WriteData((char*)0x41486D, (char)0xEB); // fix time reset at level load for Gamma
-		WriteData((__int16**)0x414A0C, &selectedcharacter[0]); // fix 1min minimum at level restart for Gamma
-		WriteCall((void*)0x426081, GetCharacter0ID); // fix Gamma's timer
-		WriteCall((void*)0x4266C9, GetCharacter0ID); // fix Gamma's time bonus
-		WriteCall((void*)0x426379, GetCharacter0ID); // fix Gamma's time display
+
+
 		WriteJump((void*)0x47A907, (void*)0x47A936); // prevent Knuckles from automatically loading Emerald radar
 		WriteData<6>((void*)0x475E7C, 0x90u); // make radar work when not Knuckles
 		WriteData<6>((void*)0x4764CC, 0x90u); // make Tikal hints work when not Knuckles
-		WriteCall((void*)0x4D677C, GetCharacter0ID); // fix item boxes for Gamma
+
 		WriteCall((void*)0x4D6786, GetCharacter0ID); // fix item boxes for Big
 		WriteCall((void*)0x4D6790, GetCharacter0ID); // fix item boxes for Sonic
-		WriteCall((void*)0x4C06D9, GetCharacter0ID); // fix floating item boxes for Gamma
+
 		WriteCall((void*)0x4C06E3, GetCharacter0ID); // fix floating item boxes for Big
 		WriteCall((void*)0x4C06ED, GetCharacter0ID); // fix floating item boxes for Sonic
 		WriteCall((void*)0x424D0A, GetSelectedCharacter); // fix character sfx for Casinopolis
@@ -1708,7 +1680,7 @@ extern "C"
 		WriteJump((void*)Sonic_SpinPtr, Sonic_Spin_);
 		WriteJump((void*)Sonic_JumpPadAniPtr, Sonic_JumpPadAni_);
 
-		const IniFile *settings = new IniFile(std::string(path) + "\\config.ini");
+		const IniFile* settings = new IniFile(std::string(path) + "\\config.ini");
 		for (int i = 0; i < Characters_MetalSonic; i++)
 			defaultcharacters[i] = ParseCharacterID(settings->getString("Player1", charnames[i]), (Characters)i);
 		tailsaicharacter = ParseCharacterID(settings->getString("Player2", "TailsAICharacter"), Characters_Tails);
