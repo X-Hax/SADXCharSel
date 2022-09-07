@@ -1,29 +1,28 @@
 #include "stdafx.h"
 
-Trampoline* EggViper_t;
-Trampoline* sub_580E70_t;
-Trampoline* Egm3Sippo_t;
-Trampoline* sub_580A90_t;
+static FunctionHook<void, task*> EggViper_t((intptr_t)EggViper_Main);
+static FunctionHook<void, task*> sub_580E70_t((intptr_t)sub_580E70);
+static FunctionHook<void, task*>  Egm3Sippo_t((intptr_t)EGM3Sippo);
+static FunctionHook<void, task*> sub_580A90_t((intptr_t)sub_580A90);
 
-Trampoline* Chaos0_t;
-Trampoline* Chaos2_t;
-Trampoline* EggHornet_t;
-
+static FunctionHook<void, task*>  Chaos0_t((intptr_t)Chaos0_Main);
+static FunctionHook<void, task*> Chaos2_t((intptr_t)Chaos2_Main);
+static FunctionHook<void, task*>  EggHornet_t((intptr_t)EggHornet_Main);
 
 //Delete gamma shot on target
-void Remove_Cursor(ObjectMaster* obj) {
+void Remove_Cursor(task* obj) {
 
-	EntityData1* data = obj->Data1;
+	auto data = obj->twp;
 
 	if (data) {
-		if (data->Status & Status_Hurt) {
-			E102KillCursor((ObjectMaster*)obj);
+		if (data->flag & Status_Hurt) {
+			E102KillCursor(obj);
 		}
 	}
 }
 
 //Allow gamma to target object
-void Check_AllocateObjectData2(ObjectMaster* obj, EntityData1* data1)
+void Check_AllocateEnemyInit(task* obj, taskwk* data1)
 {
 	if (!obj || !data1)
 		return;
@@ -31,15 +30,15 @@ void Check_AllocateObjectData2(ObjectMaster* obj, EntityData1* data1)
 	//if one of the player is gamma, init the target thing
 	for (int i = 0; i < 8; i++) {
 
-		if (!EntityData1Ptrs[i])
+		if (!playertwp[i])
 			continue;
 
 		if (EntityData1Ptrs[i]->CharID == Characters_Gamma)
 		{
-			if (!data1->Action)
+			if (!data1->mode)
 			{
-				AllocateObjectData2(obj, data1);
-				ObjectData2_SetStartPosition(obj->Data1, (ObjectData2*)obj->Data2);
+				EnemyInitialize(obj, data1);
+				EnemyPreserveHomePosition(data1, (enemywk*)obj->mwp);
 			}
 
 			Remove_Cursor(obj);
@@ -48,43 +47,35 @@ void Check_AllocateObjectData2(ObjectMaster* obj, EntityData1* data1)
 }
 
 //Viper stuff
-void sub_580A90_r(ObjectMaster* obj) {
+void sub_580A90_r(task* obj) {
 
 	Remove_Cursor(obj);
-
-	ObjectFunc(origin, sub_580A90_t->Target());
-	origin(obj);
+	sub_580A90_t.Original(obj);
 }
 
-void Egm3Sippo_r(ObjectMaster* obj) {
+void Egm3Sippo_r(task* obj) {
 
 	Remove_Cursor(obj);
-
-	ObjectFunc(origin, Egm3Sippo_t->Target());
-	origin(obj);
+	Egm3Sippo_t.Original(obj);
 }
 
-void sub_580E70_r(ObjectMaster* obj) {
+void sub_580E70_r(task* obj) {
 
 	Remove_Cursor(obj);
-
-	ObjectFunc(origin, sub_580E70_t->Target());
-	origin(obj);
+	sub_580E70_t.Original(obj);
 }
 
-void EggViper_Main_r(ObjectMaster* obj) {
+void EggViper_Main_r(task* obj) {
 
 	Remove_Cursor(obj);
-
-	ObjectFunc(origin, EggViper_t->Target());
-	origin(obj);
+	EggViper_t.Original(obj);
 }
 
 void FixGammaBounce(unsigned __int8 playerID, float speedX, float speedY, float speedZ) {
 
-	if (EntityData1Ptrs[playerID]) {
+	if (playertwp[playerID]) {
 
-		if (EntityData1Ptrs[playerID]->CharID == Characters_Gamma)
+		if (playertwp[playerID]->counter.b[1] == Characters_Gamma)
 			return;
 	}
 
@@ -102,61 +93,54 @@ void EggViper_GammaFixes() {
 	WriteCall((void*)0x580F27, FixGammaBounce);
 
 	//remove gamma missile on Viper after a hit
-	EggViper_t = new Trampoline((int)EggViper_Main, (int)EggViper_Main + 0x5, EggViper_Main_r);
-	sub_580E70_t = new Trampoline((int)sub_580E70, (int)sub_580E70 + 0x5, sub_580E70_r);
-	Egm3Sippo_t = new Trampoline((int)EGM3Sippo, (int)EGM3Sippo + 0x8, Egm3Sippo_r);
-	sub_580A90_t = new Trampoline((int)sub_580A90, (int)sub_580A90 + 0x8, sub_580A90_r);
+	EggViper_t.Hook(EggViper_Main_r);
+
+	sub_580E70_t.Hook(sub_580E70_r);
+	Egm3Sippo_t.Hook(Egm3Sippo_r);
+	sub_580A90_t.Hook(sub_580A90_r);
 }
 
 
-void Chaos2_Main_R(ObjectMaster* obj) {
+void Chaos2_Main_R(task* obj) {
 
-	EntityData1* data1 = obj->Data1;
+	auto data1 = obj->twp;
 
-	Check_AllocateObjectData2(obj, data1);
+	Check_AllocateEnemyInit(obj, data1);
 
-	ObjectFunc(origin, Chaos2_t->Target());
-	origin(obj);
+	Chaos2_t.Original(obj);
 }
 
-void Chaos0_Main_R(ObjectMaster* obj) {
+void Chaos0_Main_R(task* obj) {
 
-	EntityData1* data1 = obj->Data1;
-	Check_AllocateObjectData2(obj, data1);
+	auto data1 = obj->twp;
+	Check_AllocateEnemyInit(obj, data1);
 
-	ObjectFunc(origin, Chaos0_t->Target());
-	origin(obj);
+	Chaos0_t.Original(obj);
 }
-
 
 void __cdecl Chaos_Init()
 {
-	Chaos0_t = new Trampoline((int)Chaos0_Main, (int)Chaos0_Main + 0x7, Chaos0_Main_R);
-	Chaos2_t = new Trampoline((int)Chaos2_Main, (int)Chaos2_Main + 0x6, Chaos2_Main_R);
+	Chaos0_t.Hook(Chaos0_Main_R);
+	Chaos2_t.Hook(Chaos2_Main_R);
 }
 
+void EggHornet_Main_R(task* obj) {
 
-void EggHornet_Main_R(ObjectMaster* obj) {
+	auto data1 = obj->twp;
+	Check_AllocateEnemyInit(obj, data1);
 
-	EntityData1* data1 = obj->Data1;
-	Check_AllocateObjectData2(obj, data1);
-
-	ObjectFunc(origin, EggHornet_t->Target());
-	origin(obj);
+	EggHornet_t.Original(obj);
 }
 
 
 extern __int16 selectedcharacter[PLAYER_COUNT];
-
-
 
 void Init_GammaFixes() {
 
 	EggViper_GammaFixes();
 	Chaos_Init();
 
-	EggHornet_t = new Trampoline((int)EggHornet_Main, (int)EggHornet_Main + 0x7, EggHornet_Main_R);
-
+	EggHornet_t.Hook(EggHornet_Main_R);
 
 	WriteCall((void*)0x426005, GetCharacter0ID); // fix ResetTime() for Gamma
 	WriteCall((void*)0x427F2B, GetCharacter0ID); // fix ResetTime2() for Gamma

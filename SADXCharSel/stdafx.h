@@ -17,7 +17,7 @@
 
 const unsigned char PLAYER_COUNT = 4;
 #include "SADXModLoader.h"
-#include "Trampoline.h"
+#include "FunctionHook.h"
 #include "mod.h"
 #include "SADX-Utils.h"
 #include "util.h"
