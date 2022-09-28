@@ -925,20 +925,6 @@ __declspec(naked) void SetKnucklesWinPose()
 	}
 }
 
-//in vanilla, the game only load those animation if you play the character concerned, we do not need those restrictions here.
-void __cdecl LoadPlayerMotionData_r(int curChar)
-{
-	SonicAnimData[75].Animation = SONIC_ACTIONS[100];
-	SonicAnimData[76].Animation = SONIC_ACTIONS[101];
-	KnuxAnimData[39].Animation = KNUCKLES_ACTIONS[40];
-	KnuxAnimData[40].Animation = KNUCKLES_ACTIONS[41];
-	BigAnimData[50].Animation = BIG_ACTIONS[4];
-	BigAnimData[51].Animation = BIG_ACTIONS[4];
-	BigAnimData[52].Animation = BIG_ACTIONS[29];
-	BigAnimData[54].Animation = BIG_ACTIONS[30];
-	BigAnimData[53].Animation = BigAnimData[54].Animation;
-}
-
 void init_Patches()
 {
 	// Enables WriteAnalogs for controllers >= 2 (3)
@@ -1016,7 +1002,6 @@ void init_Patches()
 	WriteCall((void*)0x4E9686, GetCharacter0ID); // fix ice cap snowboard 2
 	WriteCall((void*)0x597B1C, GetCharacter0ID); // fix sand hill snowboard
 	WriteCall((void*)0x4949ED, SwapSonicTextures); // use the correct texture for Sonic / Metal Sonic 
-	WriteJump(LoadPlayerMotionData, LoadPlayerMotionData_r); //fix crash when trying to fish as Big after a chara swap
 
 	//Metal Sonic AfterImages for every player
 	WriteJump((void*)Sonic_Run1AniPtr, Sonic_Run1Ani_);
