@@ -1,13 +1,13 @@
 #pragma once
 
 FunctionPointer(void, sub_404A60, (int), 0x404A60);
+DataArray(AnimData, KnuxAnimData, 0x3C532A0, 115);
 
 ObjectFunc(E101_Main, 0x567fd0);
 ObjectFunc(E103_Main, 0x4e7e90);
 ObjectFunc(E104_Main, 0x605A90);
 ObjectFunc(MK2_Main, 0x56C0B0);
 ObjectFunc(EggViper_Main, 0x581E10);
-ObjectFunc(E102KillCursor, 0x4CEFE0);
 ObjectFunc(sub_580E70, 0x580E70);
 ObjectFunc(EGM3Sippo, 0x583FB0);
 ObjectFunc(sub_580A90, 0x580A90);
